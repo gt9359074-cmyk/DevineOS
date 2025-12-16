@@ -1,10 +1,5 @@
-const CACHE_NAME = 'divine-os-v2'; // Version bump
-const ASSETS = [
-    './index.html',
-    './index.html?mode=standalone', // The secret App URL
-    './manifest.json',
-    './icon.png'
-];
+const CACHE_NAME = 'divine-os-v8.5-standard';
+const ASSETS = ['./index.html', './manifest.json', './icon.png'];
 
 self.addEventListener('install', (e) => {
     e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
