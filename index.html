@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DivineOS // Injector_Mode_v9.9_RETRO</title>
+<title>DivineOS // Injector_Mode_v10.0_RESTORED</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
 <style>
-    /* --- SYSTEM AESTHETICS --- */
+    /* --- SYSTEM AESTHETICS (DARK/HACKER MODE) --- */
     :root {
         --bg: #0000AA;
         --win: #FFFFFF;
@@ -158,12 +159,11 @@
     .f-btn.exp:hover { background: cyan; color: black; }
     textarea { font-family: 'Courier New'; font-weight: bold; }
 </style>
-<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 </head>
 <body>
 
 <div id="bios-screen">
-    <div>DIVINE BIOS v9.9 (SECURE_BOOT)</div>
+    <div>DIVINE BIOS v10.0 (SECURE_BOOT)</div>
     <div id="bios-status-line">System Status...</div>
     <br>
     <div id="boot-log"></div>
@@ -198,7 +198,7 @@
 
 <script>
 /* ----------------------------------------------------
-   DEEP STORAGE (IndexedDB for Games)
+   DEEP STORAGE (IndexedDB for Large Files)
    ----------------------------------------------------
 */
 const DeepStorage = {
@@ -427,7 +427,7 @@ BIO.runScript('/core/terminal.js');`
             core: {
                 type: 'dir',
                 content: {
-                    // --- NEW: RETRO DECK (NES EMULATOR) ---
+                    // --- FULL APP SUITE RESTORED ---
                     "retro.js": { type: 'file', content: `
 const html = '<div style="background:#220022; color:#ff00ff; padding:10px; height:100%; font-family:monospace; display:flex; flex-direction:column; border:4px double #ff00ff;">' +
 '<div style="text-align:center; font-size:20px; border-bottom:4px double #ff00ff; margin-bottom:10px;">RETRO DECK (NES)</div>' +
@@ -476,11 +476,9 @@ window.Retro = {
         msg.style.display = 'none';
         canvas.style.display = 'block';
         
-        // AUDIO INIT
         if(!Retro.audioCtx) Retro.audioCtx = new AudioContext();
         if(Retro.audioCtx.state === 'suspended') Retro.audioCtx.resume();
         
-        // NES INIT
         Retro.nes = new jsnes.NES({
             onFrame: function(buffer) {
                 const imgData = ctx.createImageData(256, 240);
@@ -493,19 +491,13 @@ window.Retro = {
                 }
                 ctx.putImageData(imgData, 0, 0);
             },
-            onAudioSample: function(left, right) {
-                // Audio implementation simplified for single file limits
-            }
+            onAudioSample: function(left, right) {}
         });
         
-        // Load ROM
         const romStr = new TextDecoder('x-user-defined').decode(data);
         Retro.nes.loadROM(romStr);
-        
-        // Loop
         setInterval(() => { Retro.nes.frame(); }, 16);
         
-        // Input
         document.onkeydown = function(e) {
             const keyMap = { 37: 6, 38: 4, 39: 7, 40: 5, 90: 1, 88: 0, 13: 3, 17: 2 };
             if(keyMap[e.keyCode] !== undefined) Retro.nes.buttonDown(1, keyMap[e.keyCode]);
@@ -519,140 +511,18 @@ window.Retro = {
 Kernel.createWindow('RETRO DECK', 512, 550, html, 'win-retro');
 setTimeout(Retro.init, 500);
 ` },
-                    // --- BURNING BUSH (CPU STRESS) ---
-                    "heatwave.js": { type: 'file', content: `
-const html = '<div style="background:#FFFFFF;color:#000000;padding:10px;height:100%;font-family:monospace;display:flex;flex-direction:column;border:4px double #AA0000;">' +
-'<div style="text-align:center;font-size:24px;border-bottom:4px double #AA0000;margin-bottom:10px;color:#AA0000;font-weight:bold;">BURNING BUSH</div>' +
-'<div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:center;">' +
-    '<div id="hw-status" style="font-size:18px;margin-bottom:20px;background:#AA0000;color:white;padding:5px;">STATUS: COLD</div>' +
-    '<div id="hw-count" style="margin-bottom:10px;font-weight:bold;">THREADS: 0</div>' +
-'</div>' +
-'<button id="hw-btn" onclick="Heatwave.toggle()" style="padding:20px;font-size:20px;font-weight:bold;background:#AA0000;color:white;border:4px outset #ff0000;cursor:pointer;">IGNITE FIRE</button>' +
-'</div>';
-
-window.Heatwave = {
-    workers: [],
-    toggle: function() {
-        const btn = document.getElementById('hw-btn');
-        const stat = document.getElementById('hw-status');
-        const count = document.getElementById('hw-count');
-        
-        if(Heatwave.workers.length > 0) {
-            Heatwave.workers.forEach(w => w.terminate());
-            Heatwave.workers = [];
-            btn.innerText = "IGNITE FIRE";
-            btn.style.background = "#AA0000";
-            btn.style.color = "white";
-            stat.innerText = "STATUS: EXTINGUISHED";
-            stat.style.background = "#0000AA";
-            count.innerText = "THREADS: 0";
-        } else {
-            const cores = navigator.hardwareConcurrency || 4;
-            const threads = cores * 2; 
-            const blob = new Blob([\`self.onmessage=function(){while(true){Math.random()}}\`], {type: 'application/javascript'});
-            const url = URL.createObjectURL(blob);
-            for(let i=0; i<threads; i++) {
-                const w = new Worker(url);
-                w.postMessage('burn');
-                Heatwave.workers.push(w);
-            }
-            btn.innerText = "CEASE FIRE";
-            btn.style.background = "#000000";
-            btn.style.color = "red";
-            stat.innerText = "⚠ WARNING: BURNING ⚠";
-            stat.style.background = "red";
-            count.innerText = "THREADS: " + threads;
-        }
-    }
-};
-Kernel.createWindow('BURNING BUSH', 350, 400, html, 'win-heat');
-` },
-                    // --- SPIRIT WAVE (BLUETOOTH) ---
-                    "bluescan.js": { type: 'file', content: `
-const html = '<div style="background:#0000AA;color:#FFFFFF;padding:10px;height:100%;display:flex;flex-direction:column;font-family:monospace;border:4px double white;">' +
-'<div style="border-bottom:2px solid white;padding:5px;text-align:center;font-size:20px;font-weight:bold;">SPIRIT RECEIVER</div>' +
-'<button onclick="BlueScan.scan()" style="margin:10px 0;background:white;color:blue;font-weight:bold;padding:10px;cursor:pointer;border:4px outset #cccccc;">SCAN ETHER</button>' +
-'<div id="bs-log" style="flex:1;overflow:auto;border:2px solid white;padding:5px;background:white;color:black;">Waiting for spirit...</div></div>';
-window.BlueScan = {
-    scan: function() {
-        const log = document.getElementById('bs-log');
-        log.innerHTML += '<div>Scanning...</div>';
-        if (!navigator.bluetooth) { log.innerHTML += '<div style="color:red">HARDWARE MISSING</div>'; return; }
-        navigator.bluetooth.requestDevice({ acceptAllDevices: true })
-        .then(device => {
-            log.innerHTML += '<div style="background:#ccc;margin-top:5px;font-weight:bold;">FOUND: ' + (device.name || 'Unknown Device') + '</div>';
-            log.innerHTML += '<div style="font-size:10px;">ID: ' + device.id + '</div>';
-        })
-        .catch(error => { log.innerHTML += '<div style="color:red;">SILENCE.</div>'; });
-    }
-};
-Kernel.createWindow('SPIRIT WAVE', 350, 400, html, 'win-blue');
-` },
-                    // --- ORACLE NET (SUBSPACE) ---
-                    "subspace.js": { type: 'file', content: `
-const html = '<div style="background:#00AAAA;color:black;padding:10px;height:100%;font-family:monospace;display:flex;flex-direction:column;border:4px double black;">' +
-'<div style="border-bottom:2px solid black;margin-bottom:10px;text-align:center;font-size:20px;font-weight:bold;">ORACLE MAPPER</div>' +
-'<div id="ss-grid" style="flex:1;overflow:auto;border:2px solid black;padding:5px;background:white;"></div>' +
-'<button onclick="Subspace.pingAll()" style="margin-top:10px;background:white;color:black;border:4px outset black;padding:8px;cursor:pointer;font-weight:bold;">CAST NET</button></div>';
-window.Subspace = {
-    targets: ['192.168.0.1','192.168.1.1','192.168.1.254','10.0.0.1','10.0.0.138','172.16.0.1','127.0.0.1'],
-    pingAll: function() {
-        const grid = document.getElementById('ss-grid');
-        grid.innerHTML = '<div>Mapping...</div>';
-        Subspace.targets.forEach(ip => {
-            const row = document.createElement('div');
-            row.style.borderBottom = '1px dotted black';
-            row.innerText = 'PING > ' + ip;
-            grid.appendChild(row);
-            const start = Date.now();
-            fetch('http://'+ip, { mode: 'no-cors', signal: AbortSignal.timeout(1500) })
-            .then(() => { 
-                row.innerHTML = '<span style="color:green;font-weight:bold;">[ALIVE]</span> ' + ip;
-            })
-            .catch(e => {
-                if(e.name === 'AbortError') row.innerHTML = '<span style="color:grey;">[DEAD]</span> ' + ip;
-                else row.innerHTML = '<span style="color:green;font-weight:bold;">[ALIVE]</span> ' + ip;
-            });
-        });
-    }
-};
-Kernel.createWindow('ORACLE NET', 400, 450, html, 'win-sub');
-` },
-                    // --- SOUL WITNESS (IDENTITY) ---
-                    "identity.js": { type: 'file', content: `
-const html = '<div style="background:#FFFFFF;color:#0000AA;padding:10px;height:100%;font-family:monospace;border:4px double #0000AA;">' +
-'<div style="text-align:center;font-size:20px;border-bottom:4px double #0000AA;margin-bottom:10px;font-weight:bold;">SOUL WITNESS</div>' +
-'<div id="id-data" style="margin-top:10px;padding:10px;border:2px solid #0000AA;">Loading...</div></div>';
-window.Identity = {
-    init: function() {
-        const d = document.getElementById('id-data');
-        let txt = '';
-        txt += '<div>AGENT: ' + navigator.userAgent.substring(0,30) + '...</div><hr style="border-top:1px solid #0000AA;">';
-        txt += '<div>CORES: ' + (navigator.hardwareConcurrency || '?') + '</div>';
-        txt += '<div>RAM: ' + (navigator.deviceMemory || '?') + ' GB</div>';
-        txt += '<div>PLATFORM: ' + navigator.platform + '</div>';
-        txt += '<div>LANGUAGE: ' + navigator.language + '</div>';
-        txt += '<div>ONLINE: ' + navigator.onLine + '</div>';
-        
-        if(navigator.getBattery) {
-            navigator.getBattery().then(b => {
-                const batt = '<div>POWER: ' + (b.level*100) + '% ' + (b.charging?'[CHARGING]':'[DRAINING]') + '</div>';
-                d.innerHTML += batt;
-            });
-        }
-        d.innerHTML = txt;
-    }
-};
-Kernel.createWindow('SOUL WITNESS', 400, 500, html, 'win-id');
-Identity.init();
-` },
+                    "heatwave.js": { type: 'file', content: `const html = '<div style="background:#FFFFFF;color:#000000;padding:10px;height:100%;font-family:monospace;display:flex;flex-direction:column;border:4px double #AA0000;"><div style="text-align:center;font-size:24px;border-bottom:4px double #AA0000;margin-bottom:10px;color:#AA0000;font-weight:bold;">BURNING BUSH</div><div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:center;"><div id="hw-status" style="font-size:18px;margin-bottom:20px;background:#AA0000;color:white;padding:5px;">STATUS: COLD</div><div id="hw-count" style="margin-bottom:10px;font-weight:bold;">THREADS: 0</div></div><button id="hw-btn" onclick="Heatwave.toggle()" style="padding:20px;font-size:20px;font-weight:bold;background:#AA0000;color:white;border:4px outset #ff0000;cursor:pointer;">IGNITE FIRE</button></div>';window.Heatwave={workers:[],toggle:function(){const btn=document.getElementById('hw-btn');const stat=document.getElementById('hw-status');const count=document.getElementById('hw-count');if(Heatwave.workers.length>0){Heatwave.workers.forEach(w=>w.terminate());Heatwave.workers=[];btn.innerText="IGNITE FIRE";btn.style.background="#AA0000";btn.style.color="white";stat.innerText="STATUS: EXTINGUISHED";stat.style.background="#0000AA";count.innerText="THREADS: 0"}else{const cores=navigator.hardwareConcurrency||4;const threads=cores*2;const blob=new Blob([\`self.onmessage=function(){while(true){Math.random()}}\`],{type:'application/javascript'});const url=URL.createObjectURL(blob);for(let i=0;i<threads;i++){const w=new Worker(url);w.postMessage('burn');Heatwave.workers.push(w)}btn.innerText="CEASE FIRE";btn.style.background="#000000";btn.style.color="red";stat.innerText="⚠ WARNING: BURNING ⚠";stat.style.background="red";count.innerText="THREADS: "+threads}}};Kernel.createWindow('BURNING BUSH',350,400,html,'win-heat');` },
+                    "bluescan.js": { type: 'file', content: `const html = '<div style="background:#0000AA;color:#FFFFFF;padding:10px;height:100%;display:flex;flex-direction:column;font-family:monospace;border:4px double white;"><div style="border-bottom:2px solid white;padding:5px;text-align:center;font-size:20px;font-weight:bold;">SPIRIT RECEIVER</div><button onclick="BlueScan.scan()" style="margin:10px 0;background:white;color:blue;font-weight:bold;padding:10px;cursor:pointer;border:4px outset #cccccc;">SCAN ETHER</button><div id="bs-log" style="flex:1;overflow:auto;border:2px solid white;padding:5px;background:white;color:black;">Waiting for spirit...</div></div>';window.BlueScan={scan:function(){const log=document.getElementById('bs-log');log.innerHTML+='<div>Scanning...</div>';if(!navigator.bluetooth){log.innerHTML+='<div style="color:red">HARDWARE MISSING</div>';return}navigator.bluetooth.requestDevice({acceptAllDevices:true}).then(device=>{log.innerHTML+='<div style="background:#ccc;margin-top:5px;font-weight:bold;">FOUND: '+(device.name||'Unknown Device')+'</div>';log.innerHTML+='<div style="font-size:10px;">ID: '+device.id+'</div>'}).catch(error=>{log.innerHTML+='<div style="color:red;">SILENCE.</div>'})}};Kernel.createWindow('SPIRIT WAVE',350,400,html,'win-blue');` },
+                    "subspace.js": { type: 'file', content: `const html = '<div style="background:#00AAAA;color:black;padding:10px;height:100%;font-family:monospace;display:flex;flex-direction:column;border:4px double black;"><div style="border-bottom:2px solid black;margin-bottom:10px;text-align:center;font-size:20px;font-weight:bold;">ORACLE MAPPER</div><div id="ss-grid" style="flex:1;overflow:auto;border:2px solid black;padding:5px;background:white;"></div><button onclick="Subspace.pingAll()" style="margin-top:10px;background:white;color:black;border:4px outset black;padding:8px;cursor:pointer;font-weight:bold;">CAST NET</button></div>';window.Subspace={targets:['192.168.0.1','192.168.1.1','192.168.1.254','10.0.0.1','10.0.0.138','172.16.0.1','127.0.0.1'],pingAll:function(){const grid=document.getElementById('ss-grid');grid.innerHTML='<div>Mapping...</div>';Subspace.targets.forEach(ip=>{const row=document.createElement('div');row.style.borderBottom='1px dotted black';row.innerText='PING > '+ip;grid.appendChild(row);const start=Date.now();fetch('http://'+ip,{mode:'no-cors',signal:AbortSignal.timeout(1500)}).then(()=>{row.innerHTML='<span style="color:green;font-weight:bold;">[ALIVE]</span> '+ip}).catch(e=>{if(e.name==='AbortError')row.innerHTML='<span style="color:grey;">[DEAD]</span> '+ip;else row.innerHTML='<span style="color:green;font-weight:bold;">[ALIVE]</span> '+ip})})}};Kernel.createWindow('ORACLE NET',400,450,html,'win-sub');` },
+                    "identity.js": { type: 'file', content: `const html = '<div style="background:#FFFFFF;color:#0000AA;padding:10px;height:100%;font-family:monospace;border:4px double #0000AA;"><div style="text-align:center;font-size:20px;border-bottom:4px double #0000AA;margin-bottom:10px;font-weight:bold;">SOUL WITNESS</div><div id="id-data" style="margin-top:10px;padding:10px;border:2px solid #0000AA;">Loading...</div></div>';window.Identity={init:function(){const d=document.getElementById('id-data');let txt='';txt+='<div>AGENT: '+navigator.userAgent.substring(0,30)+'...</div><hr style="border-top:1px solid #0000AA;">';txt+='<div>CORES: '+(navigator.hardwareConcurrency||'?')+'</div>';txt+='<div>RAM: '+(navigator.deviceMemory||'?')+' GB</div>';txt+='<div>PLATFORM: '+navigator.platform+'</div>';txt+='<div>LANGUAGE: '+navigator.language+'</div>';txt+='<div>ONLINE: '+navigator.onLine+'</div>';if(navigator.getBattery){navigator.getBattery().then(b=>{const batt='<div>POWER: '+(b.level*100)+'% '+(b.charging?'[CHARGING]':'[DRAINING]')+'</div>';d.innerHTML+=batt})}d.innerHTML=txt}};Kernel.createWindow('SOUL WITNESS',400,500,html,'win-id');Identity.init();` },
                     "injector.js": { type: 'file', content: "const html='<div style=\"padding:10px;background:#111;color:#0f0;height:100%\"><b>INJECTOR MODE</b><br><br><input type=\"color\" oninput=\"document.documentElement.style.setProperty(\\'--bg\\',this.value)\"><br>Background Color<br><br><input type=\"color\" oninput=\"document.documentElement.style.setProperty(\\'--accent\\',this.value)\"><br>Accent Color<br><br><button onclick=\"BIO.saveFile(\\'/system/injector.flag\\',\\'TRUE\\');BIO.toast(\\'PERMANENT ROOT ACCESS GRANTED\\')\">UNLOCK PERMANENT ROOT</button></div>';Kernel.createWindow('INJECTOR',300,400,html,'win-inj');" },
                     "mesh.js": { type: 'file', content: "const html='<div style=\"background:#222;color:white;padding:10px;height:100%\"><b>MESH NETWORK</b><br>ID: <span id=\"m-id\">...</span><br><br><input id=\"m-target\" placeholder=\"Target ID\"><button onclick=\"Mesh.conn()\">CONNECT</button><div id=\"m-log\"></div></div>';window.Mesh={init:function(){let u=localStorage.getItem('divineOS_signal_user')||'anon'+Math.floor(Math.random()*999);const p=new Peer(u+'_net');p.on('open',i=>document.getElementById('m-id').innerText=i);p.on('connection',c=>{Mesh.c=c;c.on('data',d=>BIO.toast('MESH DATA: '+d))})},conn:function(){const t=document.getElementById('m-target').value;const c=new Peer().connect(t);c.on('open',()=>c.send('HELLO FROM MESH'))}};Kernel.createWindow('MESH',300,300,html,'win-mesh');setTimeout(Mesh.init,1000);" },
-                    "nexus.js": { type: 'file', content: "const id='win-nexus';const html='<div style=\"display:flex;flex-direction:column;height:100%;background:#ccc\"><div style=\"padding:5px;display:flex;gap:5px\"><input id=\"nx-url\" value=\"/www/bookmarks.html\" style=\"flex:1\" onkeydown=\"if(event.key===\\'Enter\\')Nexus.go()\"><button onclick=\"Nexus.go()\">GO</button></div><iframe id=\"nx-frame\" style=\"flex:1;border:none\"></iframe></div>';window.Nexus={go:function(){let u=document.getElementById('nx-url').value;if(u.includes('youtube.com'))u='https://yewtu.be';const f=document.getElementById('nx-frame');if(u.startsWith('/www')){const file=BIO.resolve(u);f.srcdoc=file?file.content:'404'}else{f.src=u.startsWith('http')?u:'https://'+u}}};Kernel.createWindow('NEXUS',600,500,html,id);Nexus.go();" },
-                    "terminal.js": { type: 'file', content: "const id='win-term';const html='<div style=\"background:black;color:white;padding:5px;height:100%;overflow:auto\" onclick=\"document.getElementById(\\'cmd\\').focus()\"><div id=\"term-log\">DIVINE OS SHELL (Secure)<br></div>> <input id=\"cmd\" style=\"background:transparent;border:none;color:yellow;outline:none\" onkeydown=\"if(event.key===\\'Enter\\')TERM(this)\"></div>';window.TERM=function(i){const v=i.value;document.getElementById('term-log').innerHTML+='<div>> '+v+'</div>';const [c,a]=v.split(' ');if(c==='help')document.getElementById('term-log').innerHTML+='<div>CMD: ls, run, edit, mkdir, rm, cat, export, heal, clear</div><div style=\"color:cyan\">UNLOCK: injector, bluescan, subspace, identity, heatwave, retro</div>';else if(c==='retro'){BIO.saveFile('/system/retro.flag','TRUE');BIO.toast('RETRO DECK UNLOCKED');}else if(c==='heatwave'){BIO.saveFile('/system/heatwave.flag','TRUE');BIO.toast('HEATWAVE UNLOCKED');}else if(c==='ls')BIO.runScript('/core/manifest.js');else if(c==='run')BIO.runScript(a);else if(c==='rm')BIO.deleteFile(a);i.value='';i.scrollIntoView()};Kernel.createWindow('TERMINAL',500,300,html,id);" },
+                    "nexus.js": { type: 'file', content: "const id='win-nexus';const html='<div style=\"display:flex;flex-direction:column;height:100%;background:#ccc\"><div style=\"padding:5px;display:flex;gap:5px\"><input id=\"nx-url\" value=\"/www/bookmarks.html\" style=\"flex:1\" onkeydown=\"if(event.key===\\'Enter\\')Nexus.go()\"><button onclick=\"Nexus.go()\">GO</button></div><iframe id=\"nx-frame\" style=\"flex:1;border:none\"></iframe></div>';window.Nexus={go:function(){let u=document.getElementById('nx-url').value;if(u.includes('youtube.com'))u='https://yewtu.be';if(u.includes('reddit.com'))u='https://libreddit.frehed.org';const f=document.getElementById('nx-frame');if(u.startsWith('/www')){const file=BIO.resolve(u);f.srcdoc=file?file.content:'404'}else{f.src=u.startsWith('http')?u:'https://'+u}}};Kernel.createWindow('NEXUS',600,500,html,id);Nexus.go();" },
+                    "taskmgr.js": { type: 'file', content: `const html = '<div style="height:100%; display:flex; flex-direction:column; padding:10px;"><div style="border-bottom:1px solid black; font-weight:bold;">ACTIVE PROCESSES</div><div id="proc-list" style="flex:1; overflow:auto; margin-top:5px;"></div><button onclick="TaskMgr.refresh()" style="margin-top:5px;">REFRESH</button></div>';window.TaskMgr = {refresh: function() {const list = document.getElementById('proc-list');list.innerHTML = '';const wins = window.Kernel.activeWindows;for(let id in wins) {const row = document.createElement('div');row.style.borderBottom = '1px dotted #ccc';row.style.display = 'flex'; row.style.justifyContent = 'space-between';row.innerHTML = '<span>'+wins[id]+'</span> <button onclick="Kernel.closeWindow(\\''+id+'\\');TaskMgr.refresh()" style="background:red;color:white;border:none;cursor:pointer;">KILL</button>';list.appendChild(row)}}};Kernel.createWindow('TASK_MANAGER', 300, 400, html, 'win-taskmgr');TaskMgr.refresh();` },
+                    "config_editor.js": { type: 'file', content: `const html = '<div style="height:100%; display:flex; flex-direction:column; padding:10px;"><h3>SYSTEM CONFIGURATION</h3><p>Changes apply immediately upon save.</p><textarea id="cfg-data" style="flex:1; margin-bottom:10px; font-family:monospace;"></textarea><button onclick="Config.save()" style="padding:10px;">SAVE & APPLY</button></div>';window.Config = {init: function() {const file = BIO.resolve('/system/config.json');if(file) document.getElementById('cfg-data').value = file.content.trim();},save: function() {const data = document.getElementById('cfg-data').value;try { JSON.parse(data); } catch(e) { return BIO.toast("INVALID JSON"); }BIO.saveFile('/system/config.json', data);BIO.applyTheme();}};Kernel.createWindow('SETTINGS', 400, 500, html, 'win-cfg');Config.init();` },
                     "manifest.js": { type: 'file', content: `window.Manifest={render:function(path){const dir=BIO.resolve(path);let html='<div style="background:#ddd; padding:5px; border-bottom:1px solid black;">PATH: '+path+'</div><div class="file-list">';if(path!=='/'){const parent=path.substring(0,path.lastIndexOf('/'))||'/';html+='<div class="file-row"><span class="f-icon" onclick="Manifest.render(\\''+parent+'\\')">🔙</span><span class="f-name" onclick="Manifest.render(\\''+parent+'\\')">.. (UP)</span></div>'}if(dir){for(let key in dir){const fullPath=(path==='/'?'':path)+'/'+key;const item=dir[key];const isDir=item.type==='dir';const icon=isDir?'📁':(key.endsWith('.snd')?'🎵':'📄');const clickAction=isDir?"Manifest.render(\\''+fullPath+'\\')":"BIO.runScript(\\''+fullPath+'\\')";html+='<div class="file-row"><span class="f-icon" onclick="'+clickAction+'">'+icon+'</span><span class="f-name" onclick="'+clickAction+'">'+key+'</span>';if(!isDir){html+='<button class="f-btn" onclick="BIO.editFile(\\''+fullPath+'\\')">EDIT</button><button class="f-btn" onclick="BIO.runScript(\\''+fullPath+'\\')">RUN</button><button class="f-btn exp" onclick="BIO.exportFile(\\''+fullPath+'\\')">EXP</button>'}else{html+='<button class="f-btn" onclick="Manifest.render(\\''+fullPath+'\\')">OPEN</button>'}html+='<button class="f-btn del" onclick="BIO.deleteFile(\\''+fullPath+'\\'); Manifest.render(\\''+path+'\\')">DEL</button></div>'}}html+='</div>';const existing=document.getElementById('win-manifest');if(existing){existing.querySelector('.content').innerHTML=html;existing.style.zIndex=++BIO.zIndex}else{Kernel.createWindow('MANIFEST',450,400,html,'win-manifest')}}};Manifest.render('/home');` },
                     "notepad.js": { type: 'file', content: `window.Notepad=function(path,content){const id='note-'+Math.random().toString(36).substr(2,5);const safeContent=content?content.replace(/</g,'&lt;'):'';const initialPath=path||'/home/untitled.txt';const html='<div style="display:flex; flex-direction:column; height:100%;"><div style="background:#eee; padding:5px; border-bottom:1px solid black; display:flex; flex-direction:column; gap:5px;"><div style="display:flex; gap:5px;"><span style="line-height:24px;">FILE:</span><input id="path-'+id+'" value="'+initialPath+'" style="flex:1; font-family:monospace;"></div><div style="display:flex; gap:5px;"><button onclick="Notepad.save(\\''+id+'\\')">💾 SAVE TO DISK</button><button onclick="BIO.runCode(document.getElementById(\\'txt-'+id+'\\').value)">▶ TEST CODE</button></div></div><textarea id="txt-'+id+'" oninput="this.style.height=\\'\\';this.style.height=this.scrollHeight+\\'px\\'" style="flex-grow:1; border:none; resize:none; padding:10px; font-family:Courier New; font-size:14px; white-space:pre; background:white; color:black; overflow:hidden; min-height:300px;">'+safeContent+'</textarea></div>';Kernel.createWindow('SCRIBE',500,450,html,id)};window.Notepad.save=function(id){const path=document.getElementById('path-'+id).value;const content=document.getElementById('txt-'+id).value;BIO.saveFile(path,content)};if(typeof _ARGS!=='undefined'&&_ARGS)Notepad(_ARGS.path,_ARGS.content);else Notepad(null,'');` },
-                    "config_editor.js": { type: 'file', content: `const html = '<div style="height:100%; display:flex; flex-direction:column; padding:10px;"><h3>SYSTEM CONFIGURATION</h3><p>Changes apply immediately upon save.</p><textarea id="cfg-data" style="flex:1; margin-bottom:10px; font-family:monospace;"></textarea><button onclick="Config.save()" style="padding:10px;">SAVE & APPLY</button></div>';window.Config = {init: function() {const file = BIO.resolve('/system/config.json');if(file) document.getElementById('cfg-data').value = file.content.trim();},save: function() {const data = document.getElementById('cfg-data').value;try { JSON.parse(data); } catch(e) { return BIO.toast("INVALID JSON"); }BIO.saveFile('/system/config.json', data);BIO.applyTheme();}};Kernel.createWindow('SETTINGS', 400, 500, html, 'win-cfg');Config.init();` },
+                    "terminal.js": { type: 'file', content: `const id='win-term';const html='<div style="background:black; color:white; padding:5px; height:100%; overflow:auto;" onclick="document.getElementById(\\'cmd\\').focus()"><div id="term-log">DIVINE OS SHELL (Core_30)<br>Type "help" for commands.<br></div><div style="display:flex"><span>> </span><input id="cmd" style="flex:1; background:transparent; border:none; color:yellow; outline:none;" onkeydown="TERM(event,this)"></div></div>';window.TERM=function(e,inp){if(e.key==='Enter'){const val=inp.value.trim();document.getElementById('term-log').innerHTML+='<div>> '+val+'</div>';const parts=val.split(' ');const c=parts[0];const arg=parts[1];if(c==='ls')BIO.runScript('/core/manifest.js');else if(c==='help')document.getElementById('term-log').innerHTML+='<div>CMD: ls, run, edit, mkdir, rm, cat, export, heal, clear</div><div style="color:cyan">UNLOCK: injector, bluescan, subspace, identity, heatwave, retro</div>';else if(c==='retro'){if(!BIO.resolve('/system/retro.flag')){BIO.saveFile('/system/retro.flag','TRUE');BIO.toast('RETRO DECK UNLOCKED');}BIO.runScript('/core/retro.js');}else if(c==='heatwave'){if(!BIO.resolve('/system/heatwave.flag')){BIO.saveFile('/system/heatwave.flag','TRUE');BIO.toast('HEATWAVE UNLOCKED');}BIO.runScript('/core/heatwave.js');}else if(c==='bluescan'){if(!BIO.resolve('/system/bluescan.flag')){BIO.saveFile('/system/bluescan.flag','TRUE');BIO.toast('SPIRIT UNLOCKED');}BIO.runScript('/core/bluescan.js');}else if(c==='subspace'){if(!BIO.resolve('/system/subspace.flag')){BIO.saveFile('/system/subspace.flag','TRUE');BIO.toast('ORACLE UNLOCKED');}BIO.runScript('/core/subspace.js');}else if(c==='identity'){if(!BIO.resolve('/system/identity.flag')){BIO.saveFile('/system/identity.flag','TRUE');BIO.toast('WITNESS UNLOCKED');}BIO.runScript('/core/identity.js');}else if(c==='injector'){if(!BIO.resolve('/system/injector.flag')){BIO.saveFile('/system/injector.flag','TRUE');BIO.toast('INJECTOR UNLOCKED');}BIO.runScript('/core/injector.js');}else if(c==='run'&&arg)BIO.runScript(arg);else if(c==='edit'&&arg)BIO.editFile(arg);else if(c==='mkdir'&&arg){BIO.saveFile(arg,'',true);document.getElementById('term-log').innerHTML+='<div>Created Dir: '+arg+'</div>'}else if(c==='rm'&&arg){BIO.deleteFile(arg);document.getElementById('term-log').innerHTML+='<div>Deleted: '+arg+'</div>'}else if(c==='cat'&&arg){const f=BIO.resolve(arg);if(f)document.getElementById('term-log').innerHTML+='<div style="white-space:pre;color:#ccc;">'+f.content.substring(0,200)+'</div>';else document.getElementById('term-log').innerHTML+='<div>File not found.</div>'}else if(c==='export'&&arg)BIO.exportFile(arg);else if(c==='heal')BIO.heal();else if(c==='clear')document.getElementById('term-log').innerHTML='';else document.getElementById('term-log').innerHTML+='<div>Unknown command.</div>';inp.value='';inp.scrollIntoView()}};Kernel.createWindow('TERMINAL',500,300,html,id);` },
                     "snake.js": { type: 'file', content: `const html='<div style="display:flex;justify-content:center;align-items:center;height:100%;background:#444;"><canvas id="gc" width="300" height="300" style="background:#555;border:2px solid white;"></canvas></div>';Kernel.createWindow('SERPENT',340,360,html,'win-snake');setTimeout(()=>{const c=document.getElementById('gc');if(!c)return;const ctx=c.getContext('2d');let px=10,py=10,gs=20,tc=15,ax=12,ay=12,xv=1,yv=0,trail=[],tail=5;setInterval(()=>{if(!document.getElementById('gc'))return;px+=xv;py+=yv;if(px<0)px=tc-1;if(px>tc-1)px=0;if(py<0)py=tc-1;if(py>tc-1)py=0;ctx.fillStyle='#0000AA';ctx.fillRect(0,0,300,300);ctx.fillStyle='lime';for(let i=0;i<trail.length;i++){ctx.fillRect(trail[i].x*gs,trail[i].y*gs,gs-2,gs-2);if(trail[i].x==px&&trail[i].y==py)tail=5}trail.push({x:px,y:py});while(trail.length>tail)trail.shift();if(ax==px&&ay==py){tail++;ax=Math.floor(Math.random()*tc);ay=Math.floor(Math.random()*tc)}ctx.fillStyle='red';ctx.fillRect(ax*gs,ay*gs,gs-2,gs-2)},100);document.onkeydown=e=>{if(e.key==='ArrowLeft'){xv=-1;yv=0}if(e.key==='ArrowUp'){xv=0;yv=-1}if(e.key==='ArrowRight'){xv=1;yv=0}if(e.key==='ArrowDown'){xv=0;yv=1}}},100);` },
                     "paint.js": { type: 'file', content: `const html='<div style="height:100%;display:flex;flex-direction:column;"><div style="background:#ccc;padding:5px;flex-shrink:0;"><button onclick="window.PC=\\\'black\\\'">BLK</button><button onclick="window.PC=\\\'red\\\'">RED</button><button onclick="window.PC=\\\'blue\\\'">BLU</button></div><div style="flex-grow:1;overflow:auto;background:#888;display:flex;justify-content:center;align-items:center;"><canvas id="pc" width="400" height="300" style="background:white;cursor:crosshair;border:1px solid black;"></canvas></div></div>';Kernel.createWindow('CANVAS',450,400,html,'win-paint');setTimeout(()=>{const c=document.getElementById('pc');const x=c.getContext('2d');let d=false;window.PC='black';c.onmousedown=e=>{d=true;x.beginPath();x.moveTo(e.offsetX,e.offsetY)};c.onmouseup=()=>{d=false};c.onmousemove=e=>{if(!d)return;x.strokeStyle=window.PC;x.lineWidth=4;x.lineTo(e.offsetX,e.offsetY);x.stroke()}},100);` },
                     "calc.js": { type: 'file', content: `const html='<div style="padding:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;height:100%;align-content:start;"><input id="c-d" style="grid-column:span 4;text-align:right;font-size:18px;margin-bottom:5px;"><button onclick="cA(7)">7</button><button onclick="cA(8)">8</button><button onclick="cA(9)">9</button><button onclick="cA(\\\'/\\\')">/</button><button onclick="cA(4)">4</button><button onclick="cA(5)">5</button><button onclick="cA(6)">6</button><button onclick="cA(\\\'*\\\')">*</button><button onclick="cA(1)">1</button><button onclick="cA(2)">2</button><button onclick="cA(3)">3</button><button onclick="cA(\\\'-\\\')">-</button><button onclick="cA(\\\'C\\\')">C</button><button onclick="cA(0)">0</button><button onclick="cE()">=</button><button onclick="cA(\\\'+(\\\')">+</button></div>';window.cA=v=>{let d=document.getElementById('c-d');if(v=='C')d.value='';else d.value+=v;};window.cE=()=>{let d=document.getElementById('c-d');try{d.value=eval(d.value)}catch{d.value='ERR'}};Kernel.createWindow('ABACUS',250,300,html,'win-calc');` },
@@ -719,12 +589,14 @@ Identity.init();
                     };
                     Kernel.createWindow('SYNTH',400,300,html,'win-synth');` 
                     },
-                    "chronos.js": { type: 'file', content: `let startTime=0,elapsed=0,timerInt=null;const html='<div style="background:#333;color:#0f0;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;height:100%;"><div id="time-disp" style="font-size:40px;border:4px double #0f0;padding:10px;margin-bottom:20px;background:black;flex-shrink:0;">00:00.00</div><div style="flex-shrink:0;"><button onclick="Chronos.start()" style="padding:10px;font-weight:bold;color:green;">START</button> <button onclick="Chronos.stop()" style="padding:10px;font-weight:bold;color:red;">STOP</button> <button onclick="Chronos.reset()" style="padding:10px;font-weight:bold;">RESET</button></div><div id="laps" style="margin-top:10px;font-size:12px;flex-grow:1;width:80%;border-top:1px solid #555;overflow-y:auto;"></div></div>';window.Chronos={update:function(){const n=Date.now(),d=n-startTime+elapsed,ms=Math.floor((d%1000)/10),s=Math.floor((d/1000)%60),m=Math.floor((d/60000));document.getElementById('time-disp').innerText=(m<10?'0'+m:m)+':'+(s<10?'0'+s:s)+'.'+(ms<10?'0'+ms:ms)},start:function(){if(timerInt)return;startTime=Date.now();timerInt=setInterval(Chronos.update,10)},stop:function(){if(!timerInt)return;elapsed+=Date.now()-startTime;clearInterval(timerInt);timerInt=null;const d=document.createElement('div');d.innerText="LAP: "+document.getElementById('time-disp').innerText;document.getElementById('laps').prepend(d)},reset:function(){Chronos.stop();elapsed=0;document.getElementById('time-disp').innerText="00:00.00";document.getElementById('laps').innerHTML=""}};Kernel.createWindow('CHRONOS',300,300,html,'win-chronos');` }
+                    "chronos.js": { type: 'file', content: `let startTime=0,elapsed=0,timerInt=null;const html='<div style="background:#333;color:#0f0;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;height:100%;"><div id="time-disp" style="font-size:40px;border:4px double #0f0;padding:10px;margin-bottom:20px;background:black;flex-shrink:0;">00:00.00</div><div style="flex-shrink:0;"><button onclick="Chronos.start()" style="padding:10px;font-weight:bold;color:green;">START</button> <button onclick="Chronos.stop()" style="padding:10px;font-weight:bold;color:red;">STOP</button> <button onclick="Chronos.reset()" style="padding:10px;font-weight:bold;">RESET</button></div><div id="laps" style="margin-top:10px;font-size:12px;flex-grow:1;width:80%;border-top:1px solid #555;overflow-y:auto;"></div></div>';window.Chronos={update:function(){const n=Date.now(),d=n-startTime+elapsed,ms=Math.floor((d%1000)/10),s=Math.floor((d/1000)%60),m=Math.floor((d/60000));document.getElementById('time-disp').innerText=(m<10?'0'+m:m)+':'+(s<10?'0'+s:s)+'.'+(ms<10?'0'+ms:ms)},start:function(){if(timerInt)return;startTime=Date.now();timerInt=setInterval(Chronos.update,10)},stop:function(){if(!timerInt)return;elapsed+=Date.now()-startTime;clearInterval(timerInt);timerInt=null;const d=document.createElement('div');d.innerText="LAP: "+document.getElementById('time-disp').innerText;document.getElementById('laps').prepend(d)},reset:function(){Chronos.stop();elapsed=0;document.getElementById('time-disp').innerText="00:00.00";document.getElementById('laps').innerHTML=""}};Kernel.createWindow('CHRONOS',300,300,html,'win-chronos');` },
+                    "prism.js": { type: 'file', content: "Kernel.createWindow('PRISM',400,400,'<div style=\"background:black;color:#0f0;padding:20px\">PRISM ENCRYPTION SUITE<br>Drag image to encrypt.</div>');" }
                 }
             }
         }
     },
     
+    // --- CORE FILE SYSTEM API ---
     resolve: function(path) {
         if(path === '/') return BIO.fs.root;
         const parts = path.split('/').filter(p => p);
@@ -737,31 +609,23 @@ Identity.init();
         return curr.type === 'dir' ? curr.content : curr;
     },
     
-    // --- UPDATED SAVE: HANDLES LARGE FILES ---
     saveFile: async function(path, content, isDir, silent) {
         if(!path) return;
-        
-        // --- 1. DETECT LARGE FILES (>1MB) ---
         if(content instanceof ArrayBuffer && content.byteLength > 1000000) {
-            // Hijack save to DeepStorage
             const parts = path.split('/');
             const name = parts[parts.length-1];
             await DeepStorage.save("artifact_" + name, content, BIO.masterKey);
-            // Save a reference stub in the normal FS
             content = "[DEEP_STORAGE_REF: artifact_" + name + "]";
         }
-
         const parts = path.split('/').filter(p => p);
         const fileName = parts.pop();
         let curr = BIO.fs.root;
-        
         for(let p of parts) {
             if(!curr[p]) curr[p] = { type: 'dir', content: {} };
             if(curr[p].type === 'dir') curr = curr[p].content;
             else if(curr[p]) curr = curr[p]; 
             else return;
         }
-        
         if(isDir) curr[fileName] = { type: 'dir', content: {} };
         else curr[fileName] = { type: 'file', content: content };
         
@@ -769,11 +633,9 @@ Identity.init();
             const str = JSON.stringify(BIO.fs);
             localStorage.setItem('divineOS_disk', CryptoJS.AES.encrypt(str, BIO.masterKey).toString());
         }
-        
         if(path === '/system/config.json') BIO.applyTheme();
         if(!silent && !isDir) BIO.toast("Saved: " + fileName);
-        const manifest = document.getElementById('win-manifest');
-        if(manifest && window.Manifest) Manifest.render(path.substring(0, path.lastIndexOf('/')) || '/');
+        if(document.getElementById('win-manifest') && window.Manifest) Manifest.render(path.substring(0, path.lastIndexOf('/')) || '/');
     },
     
     deleteFile: function(path) {
@@ -793,37 +655,12 @@ Identity.init();
             localStorage.setItem('divineOS_disk', CryptoJS.AES.encrypt(str, BIO.masterKey).toString());
         }
         BIO.toast("Deleted: " + name); 
-        const manifest = document.getElementById('win-manifest');
-        if(manifest && window.Manifest) Manifest.render(path.substring(0, path.lastIndexOf('/')) || '/');
+        if(document.getElementById('win-manifest') && window.Manifest) Manifest.render(path.substring(0, path.lastIndexOf('/')) || '/');
     },
     
-    // --- UTILITIES ---
-    log: function(msg) {
-        const el = document.createElement('div');
-        el.className = 'log-line';
-        el.innerText = "> " + msg;
-        document.getElementById('boot-log').appendChild(el);
-    },
-    sysLog: function(msg) { console.log(msg); },
-    toast: function(msg) {
-        const c = document.getElementById('toast-container');
-        if(!c) return;
-        const t = document.createElement('div');
-        t.className = 'toast';
-        t.innerText = '> ' + msg;
-        c.appendChild(t);
-        setTimeout(() => t.remove(), 3000);
-    },
-    crash: function(msg) {
-        document.getElementById('bsod').style.display = 'flex';
-        document.getElementById('desktop').style.display = 'none';
-        document.getElementById('taskbar').style.display = 'none';
-        document.getElementById('bios-screen').style.display = 'none';
-    },
     factoryReset: function() {
         if(confirm("DESTROY DATA?")) {
             localStorage.removeItem('divineOS_disk');
-            // Clear IndexedDB too
             const req = indexedDB.deleteDatabase(DeepStorage.dbName);
             req.onsuccess = () => location.reload();
         }
@@ -890,7 +727,6 @@ Identity.init();
                 }
             },
             () => {
-                // Initialize Deep Storage in background
                 DeepStorage.init().then(() => BIO.log("DEEP_STORE: Online.")).catch(() => BIO.log("DEEP_STORE: Fail."));
             },
             () => {
@@ -929,9 +765,6 @@ Identity.init();
                 Kernel.createWindow('VIEW', 400, 400, '<img src="'+file.content+'" style="width:100%">');
                 return;
             }
-            if(path.endsWith('.snd') || file.content.startsWith('data:audio')) {
-                // ... (Sound player logic from previous versions would go here if needed, omitted for brevity but standard JS execution works)
-            }
             window._ARGS = null; const f = new Function(file.content); f();
         } catch(e) { BIO.toast("EXEC ERROR: " + e.message); }
     },
@@ -946,19 +779,17 @@ Identity.init();
         document.getElementById('desktop').classList.remove('drag-over');
         if (e.dataTransfer.files.length > 0) {
             const file = e.dataTransfer.files[0];
-            const reader = new FileReader();
             
-            // Binary for JSDOS/WAD files
-            if(file.name.endsWith('.jsdos') || file.name.endsWith('.wad') || file.size > 1000000) {
-                BIO.toast("Importing Heavy Artifact...");
-                // Read as ArrayBuffer for Deep Storage
+            // NES/Large File Handling
+            if(file.name.endsWith('.nes') || file.size > 1000000) {
+                BIO.toast("Importing Artifact...");
                 const binReader = new FileReader();
                 binReader.onload = (evt) => BIO.saveFile('/home/'+file.name, evt.target.result);
                 binReader.readAsArrayBuffer(file);
                 return;
             }
             
-            // Standard Text/Image handling
+            const reader = new FileReader();
             reader.onload = (evt) => BIO.saveFile('/home/'+file.name, evt.target.result);
             if(file.type.startsWith('image')) reader.readAsDataURL(file);
             else reader.readAsText(file);
