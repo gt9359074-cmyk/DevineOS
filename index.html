@@ -2,34 +2,44 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DivineOS // Injector_Mode_v9.5_FIXED</title>
+<title>DivineOS // Temple_Mode_v10.3</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
 <style>
-    /* --- SYSTEM AESTHETICS (REVERTED TO DARK MODE) --- */
+    /* --- TEMPLE AESTHETICS (CGA/EGA PALETTE) --- */
     :root {
-        --bg: #0000AA;
-        --win: #FFFFFF;
-        --text: #000000;
-        --accent: #AA0000;
-        --highlight: #00AAAA;
-        --dim: #AAAAAA;
+        --bg: #0000AA;       /* God's Blue */
+        --win: #FFFFFF;      /* Pure White */
+        --text: #000000;     /* Ink Black */
+        --accent: #AA0000;   /* Blood Red */
+        --highlight: #55FFFF;/* Cyan */
+        --dim: #AAAAAA;      /* Stone Grey */
+        --gold: #FFFF55;     /* Holy Gold */
     }
     * { box-sizing: border-box; user-select: none; }
-    body, html {
+    
+    body, html, input, textarea, button {
         margin: 0; padding: 0; width: 100%; height: 100%;
-        overflow: hidden; font-family: 'Courier New', monospace;
-        background-color: #000; color: var(--text); cursor: crosshair; font-weight: bold;
+        overflow: hidden; 
+        font-family: 'Courier New', monospace;
+        font-weight: 900; /* MAXIMUM BOLDNESS */
+        font-size: 16px;
+        text-transform: uppercase; /* SHOUTING CASE */
+        background-color: #000; 
+        color: var(--text); 
+        cursor: crosshair;
         transition: background 0.3s;
     }
 
     /* BIOS SCREEN */
     #bios-screen {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: black; color: white; padding: 20px; z-index: 999999;
+        background: var(--bg); color: #FFFFFF; padding: 20px; z-index: 999999;
         display: flex; flex-direction: column; justify-content: flex-start;
-        font-size: 14px; line-height: 1.5; overflow: hidden;
+        font-size: 20px; line-height: 1.5; overflow: hidden;
+        border: 20px solid #FFFFFF;
     }
     .log-line { display: block; animation: fadein 0.1s; }
     @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
@@ -42,146 +52,145 @@
         flex-direction: column; justify-content: center; align-items: center; text-align: center;
     }
 
-    /* DESKTOP */
+    /* DESKTOP (DIVINE GRID) */
     #desktop {
         width: 100%; height: calc(100% - 40px); position: relative;
-        background-image: radial-gradient(rgba(255,255,255,0.2) 1px, transparent 1px);
-        background-size: 40px 40px;
         background-color: var(--bg);
+        background-image: 
+            linear-gradient(var(--dim) 1px, transparent 1px),
+            linear-gradient(90deg, var(--dim) 1px, transparent 1px);
+        background-size: 40px 40px;
         display: none; overflow: hidden;
     }
-    #desktop.drag-over { background-color: rgba(255,255,255,0.2); }
+    #desktop.drag-over { background-color: #FFFFFF; }
 
-    /* IMMERSIVE NOTIFICATIONS (TOASTS) */
+    /* TOASTS (MARQUEE STYLE) */
     #toast-container {
         position: absolute; top: 10px; right: 10px;
-        width: 300px; display: flex; flex-direction: column; gap: 5px;
+        width: 350px; display: flex; flex-direction: column; gap: 10px;
         z-index: 999999; pointer-events: none;
     }
     .toast {
-        background: rgba(0,0,0,0.9); color: #0f0; 
-        border: 1px solid #0f0; padding: 10px; 
-        font-size: 12px; font-family: 'Courier New';
-        box-shadow: 5px 5px 0px rgba(0,0,0,0.5);
-        animation: slideIn 0.3s forwards;
+        background: var(--gold); color: #000; 
+        border: 4px double #000; padding: 10px; 
+        font-size: 14px; font-weight: bold;
+        box-shadow: 8px 8px 0px #000;
+        animation: slideIn 0.2s forwards;
         pointer-events: auto;
     }
     @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
     /* ICONS */
     .desktop-icon {
-        position: absolute; width: 90px; height: 90px;
+        position: absolute; width: 90px; height: 110px;
         text-align: center; color: white; cursor: pointer;
         padding: 5px; display: flex; flex-direction: column;
         align-items: center; justify-content: center; z-index: 10;
         border: 1px dotted transparent;
-        text-shadow: 1px 1px 0 #000;
+        text-shadow: 2px 2px 0 #000;
     }
     .icon-img { 
         font-size: 32px; margin-bottom: 5px; width: 50px; height: 50px;
         display: flex; align-items: center; justify-content: center;
-        border: 4px double rgba(255,255,255,0.5); border-radius: 4px;
-        box-shadow: 3px 3px 0px rgba(0,0,0,0.5);
-        transition: transform 0.1s, filter 0.1s;
+        background: #FFFFFF; color: #000;
+        border: 4px solid #000;
+        box-shadow: 4px 4px 0px #555;
+        transition: transform 0.1s;
     }
-    .desktop-icon:hover .icon-img { transform: translateY(-2px); filter: brightness(1.2); border-color: white; }
-    .icon-label { font-size: 12px; background: rgba(0,0,0,0.5); color: white; padding: 2px 5px; border-radius: 2px; }
-    .desktop-icon:hover .icon-label { background: black; }
+    .desktop-icon:hover .icon-img { transform: translate(2px, 2px); box-shadow: none; background: var(--gold); }
+    .icon-label { font-size: 12px; background: #000; color: #FFF; padding: 2px 5px; }
 
-    /* WINDOWS */
+    /* WINDOWS (BRUTALIST TEMPLE) */
     .window {
         position: absolute; background: var(--win); color: var(--text);
-        border: 4px double var(--accent);
-        box-shadow: 10px 10px 0px rgba(0,0,0,0.5);
+        border: 8px double var(--accent);
+        box-shadow: 15px 15px 0px #000;
         display: flex; flex-direction: column;
         min-width: 200px; min-height: 150px;
     }
     .title-bar {
-        background: var(--accent); color: #FFFF55;
+        background: var(--accent); color: var(--gold);
         padding: 5px; display: flex; justify-content: space-between;
-        align-items: center; cursor: grab; border-bottom: 2px solid black;
-        font-size: 14px; text-transform: uppercase; letter-spacing: 1px;
+        align-items: center; cursor: grab; border-bottom: 4px solid black;
+        font-size: 16px; letter-spacing: 1px;
         flex-shrink: 0;
     }
     .close-btn {
-        background: var(--highlight); color: white; border: 1px solid black;
-        width: 20px; height: 20px; text-align: center; line-height: 16px;
-        cursor: pointer;
+        background: var(--highlight); color: black; border: 2px solid black;
+        width: 25px; height: 25px; text-align: center; line-height: 20px;
+        cursor: pointer; font-weight: bold;
     }
-    .close-btn:hover { background: white; color: black; }
+    .close-btn:hover { background: white; color: red; }
     .content { flex-grow: 1; overflow: auto; position: relative; }
     .resize-handle {
-        width: 15px; height: 15px; background: var(--accent);
+        width: 20px; height: 20px; background: var(--gold);
         position: absolute; bottom: 0; right: 0; cursor: nwse-resize;
-        z-index: 10; clip-path: polygon(100% 0, 100% 100%, 0 100%);
+        z-index: 10; border-top: 2px solid black; border-left: 2px solid black;
     }
 
     /* TASKBAR */
     #taskbar {
         position: absolute; bottom: 0; left: 0;
-        width: 100%; height: 40px; background: var(--dim);
+        width: 100%; height: 45px; background: #AAAAAA;
         border-top: 4px solid white; display: none; align-items: center;
         padding: 0 10px; z-index: 9999;
     }
     #start-btn {
-        background: var(--highlight); color: white; border: 3px outset white;
+        background: var(--bg); color: white; border: 4px outset white;
         padding: 5px 15px; font-weight: bold; margin-right: 15px; cursor: pointer;
+        font-size: 16px;
     }
     #reboot-btn {
-        background: red; color: white; border: 3px outset white;
+        background: red; color: white; border: 4px outset white;
         padding: 5px 10px; font-weight: bold; margin-right: 15px; cursor: pointer;
-        font-size: 10px;
+        font-size: 12px;
     }
     .task-tab {
         background: white; border: 2px solid black; padding: 5px 10px;
         margin-right: 5px; cursor: pointer; font-size: 12px;
-        box-shadow: 3px 3px 0px #555;
-        color: black;
+        box-shadow: 4px 4px 0px #000;
+        color: black; font-weight: bold;
     }
 
-    /* APP UI */
-    .file-list { padding: 10px; }
-    .file-row { display: flex; align-items: center; padding: 5px; border-bottom: 1px dotted #ccc; }
-    .file-row:hover { background: #eee; }
-    .f-icon { font-size: 20px; margin-right: 10px; width: 30px; text-align: center; cursor: pointer; }
-    .f-name { flex-grow: 1; font-size: 14px; cursor: pointer; }
-    .f-btn { 
-        border: 1px solid black; background: #ddd; 
-        font-size: 10px; padding: 2px 5px; margin-left: 5px; 
-        cursor: pointer; font-family: 'Courier New'; font-weight: bold;
-    }
-    .f-btn:hover { background: black; color: white; }
-    .f-btn.del { color: red; }
-    .f-btn.exp { color: white; background: blue; border-color: darkblue; }
-    .f-btn.exp:hover { background: cyan; color: black; }
-    textarea { font-family: 'Courier New'; font-weight: bold; }
+    /* APP UI OVERRIDES */
+    .file-row { border-bottom: 1px dashed black !important; }
+    .f-btn { border: 2px solid black !important; background: white !important; color: black !important; font-weight: bold !important; box-shadow: 2px 2px 0 #000; }
+    .f-btn:hover { background: black !important; color: white !important; }
+    textarea { border: 2px solid black; background: #eee; font-weight: bold; }
+    input { border: 2px solid black; background: #FFF; color: #000; font-weight: bold; font-family: 'Courier New'; }
+    
+    /* BLINK ANIMATION */
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+    .blink { animation: blink 1s infinite; }
 </style>
 <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 </head>
 <body>
 
 <div id="bios-screen">
-    <div>DIVINE BIOS v9.5 (SECURE_BOOT)</div>
-    <div id="bios-status-line">System Status...</div>
+    <div style="text-align:center; border: 4px double white; padding: 20px; margin-bottom: 20px;">
+        <h1 style="color:var(--gold); text-shadow: 4px 4px 0 #000;">DIVINE INTELLECT</h1>
+        <p>TEMPLE_MODE v10.3 // 64-BIT</p>
+    </div>
+    <div id="bios-status-line" class="blink">SYSTEM STATUS: WAITING FOR SOUL...</div>
     <br>
-    <div id="boot-log"></div>
+    <div id="boot-log" style="border: 1px dashed white; padding: 10px; flex:1;"></div>
     
-    <div id="auth-ui" style="display:none; margin-top:20px; border:1px solid white; padding:20px;">
-        <p id="auth-msg">SECURE BOOT</p>
-        <input type="password" id="boot-pass" placeholder="ENTER KEY" style="background:black; color:white; border:none; border-bottom:2px solid white; font-family:monospace; font-size:18px; text-align:center; width:100%;">
+    <div id="auth-ui" style="display:none; margin-top:20px; border:8px double white; padding:20px; background:#000088;">
+        <p id="auth-msg" style="color:var(--gold); text-align:center;">ENTER OFFERING (KEY)</p>
+        <input type="password" id="boot-pass" placeholder="***" onkeydown="if(event.key==='Enter')BIO.unlockSystem()" style="background:white; color:black; border:4px inset #ccc; font-family:monospace; font-size:24px; text-align:center; width:100%;">
         <br><br>
-        <button onclick="BIO.unlockSystem()" style="background:white; color:black; font-weight:bold; padding:5px 20px; cursor:pointer;">PROCEED</button>
+        <button onclick="BIO.unlockSystem()" style="background:#AA0000; color:white; font-weight:bold; padding:10px; width:100%; border:4px outset white;">UNLOCK GATES</button>
     </div>
 
-    <div style="margin-top:auto; color:red; border-top:1px solid red; padding-top:5px;">
-        [F8] EMERGENCY: <button onclick="BIO.factoryReset()">FACTORY RESET (WIPE DISK)</button>
+    <div style="margin-top:auto; color:red; border-top:4px double white; padding-top:10px; background:white; color:black; text-align:center;">
+        [F8] <button onclick="BIO.factoryReset()" style="background:red; color:white; border:none; padding:5px;">PURGE DISK (FACTORY RESET)</button>
     </div>
 </div>
 
 <div id="bsod">
-    <h1 style="background: white; color: blue; padding: 5px;">FATAL SYSTEM ERROR</h1>
-    <button onclick="BIO.factoryReset()" style="padding:10px; font-weight:bold; color:red;">FACTORY RESET</button>
+    <h1 style="background: white; color: blue; padding: 20px; border: 10px solid red;">FATAL ERROR</h1>
+    <button onclick="BIO.factoryReset()" style="padding:20px; font-weight:bold; color:white; background:red; border: 5px outset white;">PURGE SYSTEM</button>
 </div>
 
 <div id="desktop">
@@ -189,10 +198,10 @@
 </div>
 
 <div id="taskbar">
-    <button id="start-btn" onclick="BIO.runScript('/core/manifest.js')">SYSTEM</button>
-    <button id="reboot-btn" onclick="BIO.reboot()">⟳ REBOOT</button>
+    <button id="start-btn" onclick="BIO.runScript('/core/manifest.js')">MENU</button>
+    <button id="reboot-btn" onclick="BIO.reboot()">RESET</button>
     <div id="task-list" style="display: flex;"></div>
-    <div style="margin-left: auto; color: blue;" id="clock">00:00</div>
+    <div style="margin-left: auto; color: black; font-weight:900; background:white; padding:5px; border:2px solid black;" id="clock">00:00</div>
 </div>
 
 <script>
