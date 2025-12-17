@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DivineOS // Injector_Mode_v9.2_HEATWAVE</title>
+<title>DivineOS // Injector_Mode_v9.3_AESTHETIC</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
@@ -162,7 +162,7 @@
 <body>
 
 <div id="bios-screen">
-    <div>DIVINE BIOS v9.2 (SECURE_BOOT)</div>
+    <div>DIVINE BIOS v9.3 (SECURE_BOOT)</div>
     <div id="bios-status-line">System Status...</div>
     <br>
     <div id="boot-log"></div>
@@ -355,13 +355,13 @@ BIO.runScript('/core/terminal.js');`
                 content: {
                     // --- NEW APP 4: HEATWAVE (CPU STRESS) ---
                     "heatwave.js": { type: 'file', content: `
-const html = '<div style="background:#220000;color:#ffaa00;padding:10px;height:100%;font-family:monospace;display:flex;flex-direction:column;">' +
-'<div style="text-align:center;font-size:24px;border-bottom:2px solid orange;margin-bottom:10px;">🔥 HEATWAVE</div>' +
-'<div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:center;">' +
-    '<div id="hw-status" style="font-size:18px;margin-bottom:20px;">SYSTEM STATUS: NORMAL</div>' +
-    '<div id="hw-count" style="margin-bottom:10px;">THREADS: 0</div>' +
+const html = '<div style="background:black;color:#ff5500;padding:10px;height:100%;font-family:monospace;display:flex;flex-direction:column;">' +
+'<div style="text-align:center;font-size:24px;border-bottom:2px solid #ff5500;margin-bottom:10px;letter-spacing:2px;">[ HEATWAVE PROTOCOL ]</div>' +
+'<div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:center;background:#110500;border:1px dashed #ff5500;">' +
+    '<div id="hw-status" style="font-size:18px;margin-bottom:20px;text-shadow:0 0 5px red;">SYSTEM STATUS: IDLE</div>' +
+    '<div id="hw-count" style="margin-bottom:10px;color:#884400;">THREADS: 0</div>' +
 '</div>' +
-'<button id="hw-btn" onclick="Heatwave.toggle()" style="padding:20px;font-size:20px;font-weight:bold;background:orange;border:none;cursor:pointer;">IGNITE (CPU STRESS)</button>' +
+'<button id="hw-btn" onclick="Heatwave.toggle()" style="margin-top:10px;padding:20px;font-size:20px;font-weight:bold;background:black;border:2px solid #ff5500;color:#ff5500;cursor:pointer;font-family:monospace;">[ IGNITE ]</button>' +
 '</div>';
 
 window.Heatwave = {
@@ -375,18 +375,17 @@ window.Heatwave = {
             // STOPPING
             Heatwave.workers.forEach(w => w.terminate());
             Heatwave.workers = [];
-            btn.innerText = "IGNITE (CPU STRESS)";
-            btn.style.background = "orange";
-            btn.style.color = "black";
+            btn.innerText = "[ IGNITE ]";
+            btn.style.borderColor = "#ff5500";
+            btn.style.color = "#ff5500";
             stat.innerText = "SYSTEM STATUS: COOLING DOWN...";
             stat.style.color = "#ffaa00";
             count.innerText = "THREADS: 0";
         } else {
             // STARTING
             const cores = navigator.hardwareConcurrency || 4;
-            const threads = cores * 2; // Overload threads
+            const threads = cores * 2; 
             
-            // The Worker Blob (Infinite Loop)
             const blob = new Blob([\`
                 self.onmessage = function() {
                     let i = 0;
@@ -405,10 +404,10 @@ window.Heatwave = {
                 Heatwave.workers.push(w);
             }
             
-            btn.innerText = "🛑 EXTINGUISH (STOP)";
-            btn.style.background = "red";
-            btn.style.color = "white";
-            stat.innerText = "⚠ WARNING: CPU LOAD CRITICAL";
+            btn.innerText = "[ EMERGENCY STOP ]";
+            btn.style.borderColor = "red";
+            btn.style.color = "red";
+            stat.innerText = "⚠ CRITICAL: CORE OVERLOAD ⚠";
             stat.style.color = "red";
             count.innerText = "THREADS ACTIVE: " + threads;
         }
@@ -417,10 +416,10 @@ window.Heatwave = {
 Kernel.createWindow('HEATWAVE', 350, 400, html, 'win-heat');
 ` },
                     "bluescan.js": { type: 'file', content: `
-const html = '<div style="background:#001133;color:#00ffff;padding:10px;height:100%;display:flex;flex-direction:column;font-family:monospace;">' +
-'<div style="border:1px solid #00ffff;padding:5px;text-align:center;">BLUETOOTH RADAR</div>' +
-'<button onclick="BlueScan.scan()" style="margin:10px;background:#00ffff;color:black;font-weight:bold;padding:10px;cursor:pointer;">INITIATE SCAN</button>' +
-'<div id="bs-log" style="flex:1;overflow:auto;border:1px dashed #005555;padding:5px;">Waiting for signal...</div></div>';
+const html = '<div style="background:black;color:#00ffff;padding:10px;height:100%;display:flex;flex-direction:column;font-family:monospace;">' +
+'<div style="border:1px solid #00ffff;padding:5px;text-align:center;letter-spacing:2px;background:#001122;">>> BLUESCAN_RADAR <<</div>' +
+'<button onclick="BlueScan.scan()" style="margin:10px 0;background:black;color:#00ffff;font-weight:bold;padding:10px;cursor:pointer;border:1px solid #00ffff;font-family:monospace;">[ INITIATE_SCAN ]</button>' +
+'<div id="bs-log" style="flex:1;overflow:auto;border:1px dashed #005555;padding:5px;font-size:12px;">Waiting for signal...</div></div>';
 window.BlueScan = {
     scan: function() {
         const log = document.getElementById('bs-log');
@@ -439,9 +438,9 @@ Kernel.createWindow('BLUESCAN', 350, 400, html, 'win-blue');
 ` },
                     "subspace.js": { type: 'file', content: `
 const html = '<div style="background:black;color:#00ff00;padding:10px;height:100%;font-family:monospace;display:flex;flex-direction:column;">' +
-'<div style="border-bottom:1px solid #00ff00;margin-bottom:10px;">SUBSPACE NETWORK MAPPER</div>' +
-'<div id="ss-grid" style="flex:1;overflow:auto;"></div>' +
-'<button onclick="Subspace.pingAll()" style="background:#003300;color:#00ff00;border:1px solid #00ff00;padding:5px;cursor:pointer;">START SWEEP</button></div>';
+'<div style="border-bottom:2px solid #00ff00;margin-bottom:10px;text-align:center;">// SUBSPACE_MAPPER //</div>' +
+'<div id="ss-grid" style="flex:1;overflow:auto;border:1px solid #003300;padding:5px;background:#051005;"></div>' +
+'<button onclick="Subspace.pingAll()" style="margin-top:10px;background:black;color:#00ff00;border:1px solid #00ff00;padding:8px;cursor:pointer;font-family:monospace;">[ EXECUTE_PING ]</button></div>';
 window.Subspace = {
     targets: ['192.168.0.1','192.168.1.1','192.168.1.254','10.0.0.1','10.0.0.138','172.16.0.1','127.0.0.1'],
     pingAll: function() {
@@ -449,6 +448,7 @@ window.Subspace = {
         grid.innerHTML = '<div>Initializing Ping Sequence...</div>';
         Subspace.targets.forEach(ip => {
             const row = document.createElement('div');
+            row.style.borderBottom = '1px dotted #003300';
             row.innerText = 'PING > ' + ip + ' ...';
             grid.appendChild(row);
             const start = Date.now();
@@ -466,14 +466,14 @@ window.Subspace = {
 Kernel.createWindow('SUBSPACE', 400, 450, html, 'win-sub');
 ` },
                     "identity.js": { type: 'file', content: `
-const html = '<div style="background:#220000;color:#ff5555;padding:10px;height:100%;font-family:monospace;">' +
-'<div style="text-align:center;font-size:20px;border-bottom:2px solid red;">IDENTITY AUDIT</div>' +
-'<div id="id-data" style="margin-top:10px;">Loading...</div></div>';
+const html = '<div style="background:black;color:#ff0000;padding:10px;height:100%;font-family:monospace;">' +
+'<div style="text-align:center;font-size:20px;border:2px double red;margin-bottom:10px;">IDENTITY_AUDIT</div>' +
+'<div id="id-data" style="margin-top:10px;border-left:2px solid #550000;padding-left:10px;">Loading...</div></div>';
 window.Identity = {
     init: function() {
         const d = document.getElementById('id-data');
         let txt = '';
-        txt += '<div>USER_AGENT: <span style="color:white">' + navigator.userAgent + '</span></div><hr>';
+        txt += '<div>USER_AGENT: <span style="color:white">' + navigator.userAgent + '</span></div><hr style="border-color:#330000">';
         txt += '<div>CPU CORES: <span style="color:white">' + (navigator.hardwareConcurrency || '?') + '</span></div>';
         txt += '<div>RAM (Est): <span style="color:white">' + (navigator.deviceMemory || '?') + ' GB</span></div>';
         txt += '<div>PLATFORM: <span style="color:white">' + navigator.platform + '</span></div>';
@@ -492,6 +492,7 @@ window.Identity = {
 Kernel.createWindow('IDENTITY', 400, 500, html, 'win-id');
 Identity.init();
 ` },
+                    // --- INJECTOR (HIDDEN APP) ---
                     "injector.js": {
                         type: 'file',
                         content: `
