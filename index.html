@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DivineOS // Architect_Build_v9.6</title>
+<title>DivineOS // Pi_Burner_v9.7</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
 <style>
-    /* --- SYSTEM AESTHETICS (REVERTED TO DARK MODE) --- */
+    /* --- SYSTEM AESTHETICS --- */
     :root {
         --bg: #0000AA;
         --win: #FFFFFF;
@@ -52,7 +52,7 @@
     }
     #desktop.drag-over { background-color: rgba(255,255,255,0.2); }
 
-    /* IMMERSIVE NOTIFICATIONS (TOASTS) */
+    /* TOASTS */
     #toast-container {
         position: absolute; top: 10px; right: 10px;
         width: 300px; display: flex; flex-direction: column; gap: 5px;
@@ -158,35 +158,26 @@
     textarea { font-family: 'Courier New'; font-weight: bold; }
 
     /* POLY STUDIO UI */
-    .poly-toolbar {
-        display: flex; gap: 5px; padding: 5px; background: #222; border-bottom: 2px solid white;
-    }
-    .poly-btn {
-        background: black; color: cyan; border: 1px solid cyan;
-        padding: 2px 8px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 12px;
-    }
+    .poly-toolbar { display: flex; gap: 5px; padding: 5px; background: #222; border-bottom: 2px solid white; }
+    .poly-btn { background: black; color: cyan; border: 1px solid cyan; padding: 2px 8px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 12px; }
     .poly-btn:hover { background: cyan; color: black; }
-    .poly-log {
-        height: 60px; background: black; color: cyan; font-size: 10px; padding: 5px; overflow-y: auto; border-top: 2px solid white;
-    }
+    .poly-log { height: 60px; background: black; color: cyan; font-size: 10px; padding: 5px; overflow-y: auto; border-top: 2px solid white; }
 </style>
 <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 </head>
 <body>
 
 <div id="bios-screen">
-    <div>DIVINE BIOS v9.6 (ARCHITECT_UPDATE)</div>
+    <div>DIVINE BIOS v9.7 (PI_UPDATE)</div>
     <div id="bios-status-line">System Status...</div>
     <br>
     <div id="boot-log"></div>
-    
     <div id="auth-ui" style="display:none; margin-top:20px; border:1px solid white; padding:20px;">
         <p id="auth-msg">SECURE BOOT</p>
         <input type="password" id="boot-pass" placeholder="ENTER KEY" style="background:black; color:white; border:none; border-bottom:2px solid white; font-family:monospace; font-size:18px; text-align:center; width:100%;">
         <br><br>
         <button onclick="BIO.unlockSystem()" style="background:white; color:black; font-weight:bold; padding:5px 20px; cursor:pointer;">PROCEED</button>
     </div>
-
     <div style="margin-top:auto; color:red; border-top:1px solid red; padding-top:5px;">
         [F8] EMERGENCY: <button onclick="BIO.factoryReset()">FACTORY RESET (WIPE DISK)</button>
     </div>
@@ -197,9 +188,7 @@
     <button onclick="BIO.factoryReset()" style="padding:10px; font-weight:bold; color:red;">FACTORY RESET</button>
 </div>
 
-<div id="desktop">
-    <div id="toast-container"></div>
-</div>
+<div id="desktop"><div id="toast-container"></div></div>
 
 <div id="taskbar">
     <button id="start-btn" onclick="BIO.runScript('/core/manifest.js')">SYSTEM</button>
@@ -214,22 +203,13 @@
    ----------------------------------------------------
 */
 const BIO = {
-    zIndex: 100,
-    fs: null, 
-    masterKey: null, // Holds password in RAM
+    zIndex: 100, fs: null, masterKey: null,
     
     // DEFAULT FS (CLEAN STATE)
     defaultFS: {
         root: {
-            home: { 
-                type: 'dir', 
-                content: {
-                    public: { type: 'dir', content: {} } // PUBLIC FOLDER FOR MESH
-                } 
-            },
-            var: { type: 'dir', content: { 
-                "sys.log": { type: 'file', content: "--- SYSTEM LOG STARTED ---\n" } 
-            }},
+            home: { type: 'dir', content: { public: { type: 'dir', content: {} } } },
+            var: { type: 'dir', content: { "sys.log": { type: 'file', content: "--- SYSTEM LOG STARTED ---\n" } } },
             www: {
                 type: 'dir',
                 content: {
@@ -310,54 +290,39 @@ window.Kernel = {
 };` 
                     },
                     "boot.js": { type: 'file', content: `
-/* --- BOOT SEQUENCE --- */
 BIO.applyTheme();
 BIO.sysLog("BOOT: System Loaded from LocalStorage.");
-
 const icons = [
     {name: 'TERMINAL', icon: '💻', run: '/core/terminal.js', x:0, y:0, color:'#000000'},
     {name: 'MANIFEST', icon: '📂', run: '/core/manifest.js', x:0, y:1, color:'#AA8800'}, 
     {name: 'SETTINGS', icon: '⚙️', run: '/core/config_editor.js', x:0, y:2, color:'#555555'},
     {name: 'TASKMGR',  icon: '📊', run: '/core/taskmgr.js',  x:0, y:3, color:'#005500'},
-
     {name: 'SCRIBE',   icon: '📝', run: '/core/notepad.js', x:1, y:0, color:'#0000AA'}, 
     {name: 'PRISM',    icon: '💎', run: '/core/prism.js',   x:1, y:1, color:'#8800FF'}, 
     {name: 'CANVAS',   icon: '🎨', run: '/core/paint.js',   x:1, y:2, color:'#AA00AA'}, 
     {name: 'ABACUS',   icon: '🧮', run: '/core/calc.js',    x:1, y:3, color:'#555555'},
-
     {name: 'SYNTH',    icon: '🎹', run: '/core/synth.js',   x:2, y:0, color:'#333333'},
     {name: 'SERPENT',  icon: '🐍', run: '/core/snake.js',   x:2, y:1, color:'#00AA00'}, 
     {name: 'MINES',    icon: '💣', run: '/core/mines.js',   x:2, y:2, color:'#AA0000'}, 
     {name: 'CHRONOS',  icon: '⏱️', run: '/core/chronos.js', x:2, y:3, color:'#00AAAA'}, 
-
     {name: 'NEXUS',    icon: '🌍', run: '/core/nexus.js',    x:3, y:0, color:'#0000FF'},
     {name: 'SIGNAL',   icon: '📡', run: '/core/signal.js',   x:3, y:1, color:'#FF4400'},
     {name: 'MESH',     icon: '🕸️', run: '/core/mesh.js',     x:3, y:2, color:'#3333FF'},
-
-    /* --- CREATOR TOOLS --- */
     {name: 'POLY',     icon: '📐', run: '/core/polystudio.js', x:4, y:0, color:'#00AAAA'},
-
-    /* --- TEMPLE TOOLS (Unlockable) --- */
     {name: 'SPIRIT',   icon: '📡', run: '/core/bluescan.js', x:5, y:0, color:'#0000AA', flag:'bluescan.flag'},
     {name: 'ORACLE',   icon: '🛰️', run: '/core/subspace.js', x:5, y:1, color:'#005500', flag:'subspace.flag'},
     {name: 'WITNESS',  icon: '👁️', run: '/core/identity.js', x:5, y:2, color:'#AA0000', flag:'identity.flag'},
     {name: 'INJECTOR', icon: '💉', run: '/core/injector.js', x:5, y:3, color:'#CC0000', flag:'injector.flag'},
     {name: 'BURNING',  icon: '🔥', run: '/core/heatwave.js', x:6, y:0, color:'#FF3300', flag:'heatwave.flag'}
 ];
-
-// DYNAMIC ICON LOADING
 icons.forEach(i => {
-    if(i.flag && !BIO.resolve('/system/'+i.flag)) return; // Skip if not unlocked
-    
+    if(i.flag && !BIO.resolve('/system/'+i.flag)) return;
     const d = document.createElement('div');
     d.className = 'desktop-icon';
     d.style.left = (20 + i.x*100) + 'px';
     d.style.top = (20 + i.y*100) + 'px';
     d.innerHTML = '<span class="icon-img" style="background-color:'+i.color+'">'+i.icon+'</span><span class="icon-label">'+i.name+'</span>';
-    d.onmousedown = function(e) {
-        if(!window.Kernel) return; 
-        BIO.runScript(i.run); 
-    };
+    d.onmousedown = function(e) { if(!window.Kernel) return; BIO.runScript(i.run); };
     document.getElementById('desktop').appendChild(d);
 });
 BIO.runScript('/core/terminal.js');` 
@@ -367,7 +332,87 @@ BIO.runScript('/core/terminal.js');`
             core: {
                 type: 'dir',
                 content: {
-                    // --- POLY STUDIO (NEW 3D MODELER) ---
+                    // --- HEATWAVE: REAL PI CALCULATION UPDATE ---
+                    "heatwave.js": { type: 'file', content: `
+const html = '<div style="background:#000000;color:#AA0000;padding:10px;height:100%;font-family:monospace;display:flex;flex-direction:column;border:4px double #AA0000;">' +
+'<div style="text-align:center;font-size:24px;border-bottom:4px double #AA0000;margin-bottom:10px;color:#AA0000;font-weight:bold;">BURNING BUSH (PI)</div>' +
+'<div style="flex:1;position:relative;border:1px solid #550000;margin-bottom:10px;overflow:hidden;background:#110000;">' +
+    '<div id="hw-digits" style="position:absolute;bottom:0;left:0;width:100%;word-wrap:break-word;color:#FF5555;font-size:12px;line-height:14px;padding:5px;"></div>' +
+'</div>' +
+'<div style="display:flex;justify-content:space-between;margin-bottom:10px;color:white;font-size:14px;">' +
+    '<span id="hw-status">STATUS: IDLE</span>' +
+    '<span id="hw-count">DIGITS: 0</span>' +
+'</div>' +
+'<button id="hw-btn" onclick="Heatwave.toggle()" style="padding:15px;font-size:18px;font-weight:bold;background:#AA0000;color:white;border:4px outset #ff0000;cursor:pointer;">CALCULATE</button>' +
+'</div>';
+
+window.Heatwave = {
+    worker: null,
+    digitCount: 0,
+    toggle: function() {
+        const btn = document.getElementById('hw-btn');
+        const stat = document.getElementById('hw-status');
+        const count = document.getElementById('hw-count');
+        const display = document.getElementById('hw-digits');
+
+        if(Heatwave.worker) {
+            // STOP
+            Heatwave.worker.terminate();
+            Heatwave.worker = null;
+            btn.innerText = "RESUME CALCULATION";
+            btn.style.background = "#AA0000";
+            btn.style.color = "white";
+            stat.innerText = "STATUS: PAUSED";
+            stat.style.color = "white";
+        } else {
+            // START
+            if(Heatwave.digitCount === 0) display.innerHTML = "3.";
+
+            const blob = new Blob([\`
+                let q=1n, r=0n, t=1n, k=1n, n=3n, l=3n;
+                while(true) {
+                    if (4n*q+r-t < n*t) {
+                        postMessage(n.toString());
+                        let nr = 10n*(r-n*t);
+                        n = ((10n*(3n*q+r))/t)-10n*n;
+                        q *= 10n;
+                        r = nr;
+                    } else {
+                        let nr = (2n*q+r)*l;
+                        let nn = (q*(7n*k+2n)+r*l)/(t*l);
+                        q *= k;
+                        t *= l;
+                        l += 2n;
+                        k += 1n;
+                        n = nn;
+                        r = nr;
+                    }
+                }
+            \`], {type: 'application/javascript'});
+
+            const url = URL.createObjectURL(blob);
+            Heatwave.worker = new Worker(url);
+            
+            Heatwave.worker.onmessage = function(e) {
+                const d = document.getElementById('hw-digits');
+                if(d) {
+                    d.innerHTML += e.data;
+                    Heatwave.digitCount++;
+                    document.getElementById('hw-count').innerText = "DIGITS: " + Heatwave.digitCount;
+                    d.scrollTop = d.scrollHeight;
+                }
+            };
+
+            btn.innerText = "HALT PROCESS";
+            btn.style.background = "#000000";
+            btn.style.color = "red";
+            stat.innerText = "STATUS: BURNING CPU";
+            stat.style.color = "red";
+        }
+    }
+};
+Kernel.createWindow('BURNING BUSH', 400, 500, html, 'win-heat');
+` },
                     "polystudio.js": { type: 'file', content: `
 const html = '<div style="height:100%; display:flex; flex-direction:column; background:#111; font-family:monospace;">' +
 '<div class="poly-toolbar">' +
@@ -396,9 +441,8 @@ window.Poly = {
         Poly.height = c.height = c.clientHeight;
         Poly.ctx = c.getContext('2d');
         Poly.objects = [];
-        Poly.addCube(); // Default object
+        Poly.addCube();
         
-        // Input
         c.onmousedown = e => { Poly.dragging=true; Poly.lastMouse={x:e.offsetX, y:e.offsetY}; };
         c.onmouseup = () => Poly.dragging=false;
         c.onmousemove = e => {
@@ -450,17 +494,13 @@ window.Poly = {
     },
 
     project: function(v, rot) {
-        // Rotation Matrix logic simplified
         let x=v.x, y=v.y, z=v.z;
-        // Rot X
         let ry = y*Math.cos(rot.x) - z*Math.sin(rot.x);
         let rz = y*Math.sin(rot.x) + z*Math.cos(rot.x);
         y=ry; z=rz;
-        // Rot Y
         let rx = x*Math.cos(rot.y) - z*Math.sin(rot.y);
         rz = x*Math.sin(rot.y) + z*Math.cos(rot.y);
         x=rx; z=rz;
-        
         const fov = 400;
         const scale = fov / (fov + z - Poly.cam.z);
         return { x: x*scale + Poly.width/2, y: y*scale + Poly.height/2 };
@@ -470,8 +510,6 @@ window.Poly = {
         if(!document.getElementById('poly-cnv')) return;
         const ctx = Poly.ctx;
         ctx.fillStyle = '#050505'; ctx.fillRect(0,0,Poly.width,Poly.height);
-        
-        // Grid
         ctx.strokeStyle = '#222'; ctx.beginPath();
         for(let i=0;i<Poly.width;i+=40){ ctx.moveTo(i,0); ctx.lineTo(i,Poly.height); }
         for(let i=0;i<Poly.height;i+=40){ ctx.moveTo(0,i); ctx.lineTo(Poly.width,i); }
@@ -479,93 +517,23 @@ window.Poly = {
 
         Poly.objects.forEach(obj => {
             const pVerts = obj.verts.map(v => Poly.project(v, obj.rot));
-            
             ctx.beginPath(); ctx.strokeStyle = '#00AAAA'; ctx.lineWidth = 2;
             obj.edges.forEach(e => {
                 ctx.moveTo(pVerts[e[0]].x, pVerts[e[0]].y);
                 ctx.lineTo(pVerts[e[1]].x, pVerts[e[1]].y);
             });
             ctx.stroke();
-
             ctx.fillStyle = 'white';
             pVerts.forEach(v => ctx.fillRect(v.x-2, v.y-2, 4, 4));
         });
-
-        // Center
         ctx.fillStyle = '#AA00AA'; ctx.fillRect(Poly.width/2-2, Poly.height/2-2, 4, 4);
-
         requestAnimationFrame(Poly.loop);
     }
 };
-
 Kernel.createWindow('POLY STUDIO', 600, 500, html, 'win-poly');
 setTimeout(Poly.init, 100);
 ` 
                     },
-
-                    // --- BURNING BUSH (CPU STRESS) - TEMPLE STYLE ---
-                    "heatwave.js": { type: 'file', content: `
-const html = '<div style="background:#FFFFFF;color:#000000;padding:10px;height:100%;font-family:monospace;display:flex;flex-direction:column;border:4px double #AA0000;">' +
-'<div style="text-align:center;font-size:24px;border-bottom:4px double #AA0000;margin-bottom:10px;color:#AA0000;font-weight:bold;">BURNING BUSH</div>' +
-'<div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:center;">' +
-    '<div id="hw-status" style="font-size:18px;margin-bottom:20px;background:#AA0000;color:white;padding:5px;">STATUS: COLD</div>' +
-    '<div id="hw-count" style="margin-bottom:10px;font-weight:bold;">THREADS: 0</div>' +
-'</div>' +
-'<button id="hw-btn" onclick="Heatwave.toggle()" style="padding:20px;font-size:20px;font-weight:bold;background:#AA0000;color:white;border:4px outset #ff0000;cursor:pointer;">IGNITE FIRE</button>' +
-'</div>';
-
-window.Heatwave = {
-    workers: [],
-    toggle: function() {
-        const btn = document.getElementById('hw-btn');
-        const stat = document.getElementById('hw-status');
-        const count = document.getElementById('hw-count');
-        
-        if(Heatwave.workers.length > 0) {
-            // STOPPING
-            Heatwave.workers.forEach(w => w.terminate());
-            Heatwave.workers = [];
-            btn.innerText = "IGNITE FIRE";
-            btn.style.background = "#AA0000";
-            btn.style.color = "white";
-            stat.innerText = "STATUS: EXTINGUISHED";
-            stat.style.background = "#0000AA";
-            count.innerText = "THREADS: 0";
-        } else {
-            // STARTING
-            const cores = navigator.hardwareConcurrency || 4;
-            const threads = cores * 2; 
-            
-            const blob = new Blob([\`
-                self.onmessage = function() {
-                    let i = 0;
-                    while(true) { 
-                        i = Math.random() * Math.random(); 
-                        if(i > 1000) i = 0; 
-                    }
-                };
-            \`], {type: 'application/javascript'});
-            
-            const url = URL.createObjectURL(blob);
-            
-            for(let i=0; i<threads; i++) {
-                const w = new Worker(url);
-                w.postMessage('burn');
-                Heatwave.workers.push(w);
-            }
-            
-            btn.innerText = "CEASE FIRE";
-            btn.style.background = "#000000";
-            btn.style.color = "red";
-            stat.innerText = "⚠ WARNING: BURNING ⚠";
-            stat.style.background = "red";
-            count.innerText = "THREADS: " + threads;
-        }
-    }
-};
-Kernel.createWindow('BURNING BUSH', 350, 400, html, 'win-heat');
-` },
-                    // --- SPIRIT WAVE (BLUETOOTH) - TEMPLE STYLE ---
                     "bluescan.js": { type: 'file', content: `
 const html = '<div style="background:#0000AA;color:#FFFFFF;padding:10px;height:100%;display:flex;flex-direction:column;font-family:monospace;border:4px double white;">' +
 '<div style="border-bottom:2px solid white;padding:5px;text-align:center;font-size:20px;font-weight:bold;">SPIRIT RECEIVER</div>' +
@@ -586,7 +554,6 @@ window.BlueScan = {
 };
 Kernel.createWindow('SPIRIT WAVE', 350, 400, html, 'win-blue');
 ` },
-                    // --- ORACLE NET (SUBSPACE) - TEMPLE STYLE ---
                     "subspace.js": { type: 'file', content: `
 const html = '<div style="background:#00AAAA;color:black;padding:10px;height:100%;font-family:monospace;display:flex;flex-direction:column;border:4px double black;">' +
 '<div style="border-bottom:2px solid black;margin-bottom:10px;text-align:center;font-size:20px;font-weight:bold;">ORACLE MAPPER</div>' +
@@ -616,7 +583,6 @@ window.Subspace = {
 };
 Kernel.createWindow('ORACLE NET', 400, 450, html, 'win-sub');
 ` },
-                    // --- SOUL WITNESS (IDENTITY) - TEMPLE STYLE ---
                     "identity.js": { type: 'file', content: `
 const html = '<div style="background:#FFFFFF;color:#0000AA;padding:10px;height:100%;font-family:monospace;border:4px double #0000AA;">' +
 '<div style="text-align:center;font-size:20px;border-bottom:4px double #0000AA;margin-bottom:10px;font-weight:bold;">SOUL WITNESS</div>' +
@@ -644,7 +610,6 @@ window.Identity = {
 Kernel.createWindow('SOUL WITNESS', 400, 500, html, 'win-id');
 Identity.init();
 ` },
-                    // --- INJECTOR (HIDDEN APP) ---
                     "injector.js": {
                         type: 'file',
                         content: `
@@ -710,7 +675,6 @@ Kernel.createWindow('INJECTOR', 300, 450, html, 'win-injector');
 Injector.init();
 `
                     },
-                    // --- MESH (NETWORK DRIVE) APP ---
                     "mesh.js": {
                         type: 'file',
                         content: `
