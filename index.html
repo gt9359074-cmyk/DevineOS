@@ -2,15 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DivineOS // PDF_Engine_v9.9.5</title>
+<title>DivineOS // PDF_Hotfix_v9.9.6</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-    // Initialize PDF Worker
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-</script>
 
 <style>
     /* --- SYSTEM AESTHETICS --- */
@@ -173,7 +169,7 @@
 <body>
 
 <div id="bios-screen">
-    <div>DIVINE BIOS v9.9.5 (PDF_ENGINE)</div>
+    <div>DIVINE BIOS v9.9.6 (HOTFIX)</div>
     <div id="bios-status-line">System Status...</div>
     <br>
     <div id="boot-log"></div>
@@ -1684,6 +1680,11 @@ window.onload = function() {
     d.addEventListener('dragleave', e => { e.preventDefault(); document.getElementById('desktop').classList.remove('drag-over'); });
     d.addEventListener('drop', BIO.handleDrop);
     
+    // SETUP PDF WORKER ONLY WHEN READY
+    if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
     // START BOOT PROCESS (Will stop for Password)
     BIO.reboot();
     
