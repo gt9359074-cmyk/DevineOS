@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DivineOS // Network_Node_v10</title>
+<title>DivineOS // HTML_Fix_v10.1</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style>
     /* --- SYSTEM AESTHETICS --- */
@@ -164,12 +165,11 @@
     .poly-btn:hover { background: cyan; color: black; }
     .poly-log { height: 60px; background: black; color: cyan; font-size: 10px; padding: 5px; overflow-y: auto; border-top: 2px solid white; }
 </style>
-<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 </head>
 <body>
 
 <div id="bios-screen">
-    <div>DIVINE BIOS v10.0 (NET_UPDATE)</div>
+    <div>DIVINE BIOS v10.1 (HTML_FIX)</div>
     <div id="bios-status-line">System Status...</div>
     <br>
     <div id="boot-log"></div>
@@ -309,11 +309,12 @@ const icons = [
     {name: 'NEXUS',    icon: '🌍', run: '/core/nexus.js',    x:3, y:0, color:'#0000FF'},
     {name: 'SIGNAL',   icon: '📡', run: '/core/signal.js',   x:3, y:1, color:'#FF4400'},
     {name: 'MESH',     icon: '🕸️', run: '/core/mesh.js',     x:3, y:2, color:'#3333FF'},
-    {name: 'SPIRIT',   icon: '📡', run: '/core/bluescan.js', x:4, y:0, color:'#0000AA', flag:'bluescan.flag'},
-    {name: 'ORACLE',   icon: '🛰️', run: '/core/subspace.js', x:4, y:1, color:'#005500', flag:'subspace.flag'},
-    {name: 'WITNESS',  icon: '👁️', run: '/core/identity.js', x:4, y:2, color:'#AA0000', flag:'identity.flag'},
-    {name: 'INJECTOR', icon: '💉', run: '/core/injector.js', x:4, y:3, color:'#CC0000', flag:'injector.flag'},
-    {name: 'BURNING',  icon: '🔥', run: '/core/heatwave.js', x:5, y:0, color:'#FF3300', flag:'heatwave.flag'}
+    {name: 'POLY',     icon: '📐', run: '/core/polystudio.js', x:4, y:0, color:'#00AAAA'},
+    {name: 'SPIRIT',   icon: '📡', run: '/core/bluescan.js', x:5, y:0, color:'#0000AA', flag:'bluescan.flag'},
+    {name: 'ORACLE',   icon: '🛰️', run: '/core/subspace.js', x:5, y:1, color:'#005500', flag:'subspace.flag'},
+    {name: 'WITNESS',  icon: '👁️', run: '/core/identity.js', x:5, y:2, color:'#AA0000', flag:'identity.flag'},
+    {name: 'INJECTOR', icon: '💉', run: '/core/injector.js', x:5, y:3, color:'#CC0000', flag:'injector.flag'},
+    {name: 'BURNING',  icon: '🔥', run: '/core/heatwave.js', x:6, y:0, color:'#FF3300', flag:'heatwave.flag'}
 ];
 icons.forEach(i => {
     if(i.flag && !BIO.resolve('/system/'+i.flag)) return;
@@ -582,8 +583,11 @@ window.Subspace = {
             row.style.borderBottom = '1px dotted black';
             row.innerText = 'PING > ' + ip;
             grid.appendChild(row);
+            const start = Date.now();
             fetch('http://'+ip, { mode: 'no-cors', signal: AbortSignal.timeout(1500) })
-            .then(() => { row.innerHTML = '<span style="color:green;font-weight:bold;">[ALIVE]</span> ' + ip; })
+            .then(() => { 
+                row.innerHTML = '<span style="color:green;font-weight:bold;">[ALIVE]</span> ' + ip;
+            })
             .catch(e => {
                 if(e.name === 'AbortError') row.innerHTML = '<span style="color:grey;">[DEAD]</span> ' + ip;
                 else row.innerHTML = '<span style="color:green;font-weight:bold;">[ALIVE]</span> ' + ip;
@@ -600,16 +604,542 @@ const html = '<div style="background:#FFFFFF;color:#0000AA;padding:10px;height:1
 window.Identity = {
     init: function() {
         const d = document.getElementById('id-data');
-        let txt = '<div>AGENT: ' + navigator.userAgent.substring(0,30) + '...</div><hr>';
+        let txt = '';
+        txt += '<div>AGENT: ' + navigator.userAgent.substring(0,30) + '...</div><hr style="border-top:1px solid #0000AA;">';
         txt += '<div>CORES: ' + (navigator.hardwareConcurrency || '?') + '</div>';
         txt += '<div>RAM: ' + (navigator.deviceMemory || '?') + ' GB</div>';
+        txt += '<div>PLATFORM: ' + navigator.platform + '</div>';
+        txt += '<div>LANGUAGE: ' + navigator.language + '</div>';
+        txt += '<div>ONLINE: ' + navigator.onLine + '</div>';
+        
+        if(navigator.getBattery) {
+            navigator.getBattery().then(b => {
+                const batt = '<div>POWER: ' + (b.level*100) + '% ' + (b.charging?'[CHARGING]':'[DRAINING]') + '</div>';
+                d.innerHTML += batt;
+            });
+        }
         d.innerHTML = txt;
     }
 };
 Kernel.createWindow('SOUL WITNESS', 400, 500, html, 'win-id');
 Identity.init();
 ` },
-                    "nexus.js": { type: 'file', content: `const id='win-nexus';const html='<div style="display:flex; flex-direction:column; height:100%; background:#ccc;"><div style="padding:5px; display:flex; gap:5px; border-bottom:1px solid black;"><input id="nx-url" value="/www/bookmarks.html" style="flex:1;" placeholder="http://..."><button onclick="Nexus.go()">GO</button></div><div style="flex:1; background:white; position:relative;"><iframe id="nx-frame" style="width:100%; height:100%; border:none;"></iframe></div></div>';window.Nexus={go:function(){let url=document.getElementById('nx-url').value;const frame=document.getElementById('nx-frame');if(url.includes('localhost')||url.startsWith('/www/')){let path=url.replace('http://localhost','').replace('localhost','');if(path===''||path==='/')path='/index.html';if(!path.startsWith('/'))path='/'+path;const file=BIO.resolve(path);if(file){frame.srcdoc=file.content}else{frame.srcdoc="<h1>404 NOT FOUND</h1>"}}else{if(!url.startsWith('http'))url='https://'+url;frame.removeAttribute('srcdoc');frame.src=url}}};Kernel.createWindow('NEXUS WEB',650,500,html,id);Nexus.go();` },
+                    "injector.js": {
+                        type: 'file',
+                        content: `
+/* --- DOM INJECTOR (SYSTEM OVERRIDE) --- */
+const html = \`<div style="padding:10px; background:#111; color:#0f0; height:100%; font-family:monospace; display:flex; flex-direction:column;">
+    <div style="border-bottom:1px solid #0f0; padding-bottom:5px; margin-bottom:10px; font-weight:bold;">ROOT ACCESS // DOM OVERRIDE</div>
+    <div style="flex:1; overflow:auto;">
+        <div style="margin-bottom:10px;">
+            <label>BACKGROUND COLOR (--bg)</label>
+            <input type="color" id="inj-bg" style="width:100%; height:30px; cursor:pointer;" oninput="Injector.update('--bg', this.value)">
+        </div>
+        <div style="margin-bottom:10px;">
+            <label>WINDOW BACKGROUND (--win)</label>
+            <input type="color" id="inj-win" style="width:100%; height:30px; cursor:pointer;" oninput="Injector.update('--win', this.value)">
+        </div>
+        <div style="margin-bottom:10px;">
+            <label>ACCENT COLOR (--accent)</label>
+            <input type="color" id="inj-acc" style="width:100%; height:30px; cursor:pointer;" oninput="Injector.update('--accent', this.value)">
+        </div>
+        <div style="margin-bottom:10px;">
+            <label>TEXT COLOR (--text)</label>
+            <input type="color" id="inj-txt" style="width:100%; height:30px; cursor:pointer;" oninput="Injector.update('--text', this.value)">
+        </div>
+        <div style="margin-bottom:10px;">
+            <label>HIGHLIGHT COLOR (--highlight)</label>
+            <input type="color" id="inj-high" style="width:100%; height:30px; cursor:pointer;" oninput="Injector.update('--highlight', this.value)">
+        </div>
+    </div>
+    <button onclick="Injector.save()" style="padding:10px; background:#005500; color:white; border:2px solid #0f0; font-weight:bold; cursor:pointer; margin-top:10px;">SAVE CONFIGURATION</button>
+</div>\`;
+
+window.Injector = {
+    update: function(key, val) {
+        document.documentElement.style.setProperty(key, val);
+    },
+    save: function() {
+        const file = BIO.resolve('/system/config.json');
+        if(file) {
+            try {
+                const cfg = JSON.parse(file.content);
+                cfg.theme['--bg'] = document.getElementById('inj-bg').value;
+                cfg.theme['--win'] = document.getElementById('inj-win').value;
+                cfg.theme['--accent'] = document.getElementById('inj-acc').value;
+                cfg.theme['--text'] = document.getElementById('inj-txt').value;
+                cfg.theme['--highlight'] = document.getElementById('inj-high').value;
+                BIO.saveFile('/system/config.json', JSON.stringify(cfg));
+                BIO.toast("SYSTEM OVERRIDE SAVED.");
+            } catch(e) { BIO.toast("CONFIG ERROR"); }
+        }
+    },
+    init: function() {
+        // Load current values
+        const s = getComputedStyle(document.documentElement);
+        document.getElementById('inj-bg').value = s.getPropertyValue('--bg').trim();
+        document.getElementById('inj-win').value = s.getPropertyValue('--win').trim();
+        document.getElementById('inj-acc').value = s.getPropertyValue('--accent').trim();
+        document.getElementById('inj-txt').value = s.getPropertyValue('--text').trim();
+        document.getElementById('inj-high').value = s.getPropertyValue('--highlight').trim();
+    }
+};
+
+Kernel.createWindow('INJECTOR', 300, 450, html, 'win-injector');
+Injector.init();
+`
+                    },
+                    "mesh.js": {
+                        type: 'file',
+                        content: `
+/* --- THE MESH (P2P File System) --- */
+const html = '<div style="display:flex; flex-direction:column; height:100%; font-family:monospace;">' +
+    '<div style="background:#222; color:#0f0; padding:10px; border-bottom:2px solid #0f0; display:flex; gap:10px;">' +
+        '<span>ID: <span id="mesh-id" style="color:white;">...</span></span>' +
+        '<input id="mesh-target" placeholder="Peer ID" style="flex:1; background:black; color:white; border:1px solid #555;">' +
+        '<button onclick="Mesh.connect()">CONNECT</button>' +
+    '</div>' +
+    '<div style="flex:1; display:flex; background:black;">' +
+        '<div style="flex:1; border-right:2px solid #555; display:flex; flex-direction:column;">' +
+            '<div style="background:#0000AA; color:white; padding:5px; text-align:center;">LOCAL (/home/public)</div>' +
+            '<div id="mesh-local" style="flex:1; overflow:auto; padding:5px; color:white;"></div>' +
+            '<button onclick="Mesh.refreshLocal()" style="background:#444; color:white;">REFRESH LOCAL</button>' +
+        '</div>' +
+        '<div style="flex:1; display:flex; flex-direction:column;">' +
+            '<div style="background:#AA0000; color:white; padding:5px; text-align:center;">REMOTE DRIVE</div>' +
+            '<div id="mesh-remote" style="flex:1; overflow:auto; padding:5px; color:#ccc;">NOT CONNECTED</div>' +
+            '<button onclick="Mesh.requestList()" style="background:#444; color:white;">REFRESH REMOTE</button>' +
+        '</div>' +
+    '</div>' +
+    '<div id="mesh-log" style="height:30px; background:#111; color:gray; padding:5px; font-size:12px; border-top:1px solid #555;">Ready.</div>' +
+'</div>';
+
+window.Mesh = {
+    peer: null, conn: null,
+    
+    init: function() {
+        if(!BIO.resolve('/home/public')) {
+            BIO.saveFile('/home/public/readme.txt', 'Put files here to share via Mesh.');
+        }
+        
+        let user = localStorage.getItem('divineOS_signal_user');
+        if(!user) user = 'anon_' + Math.floor(Math.random()*1000);
+        const meshId = user + '_net';
+        
+        Mesh.peer = new Peer(meshId);
+        
+        Mesh.peer.on('open', (id) => {
+            document.getElementById('mesh-id').innerText = id;
+            Mesh.log("Mesh Node Active: " + id);
+            Mesh.refreshLocal();
+        });
+        
+        Mesh.peer.on('connection', (c) => {
+            Mesh.conn = c;
+            Mesh.setupConn();
+            Mesh.log("Incoming connection from " + c.peer);
+        });
+        
+        Mesh.peer.on('error', (e) => Mesh.log("Error: " + e.type));
+    },
+    
+    connect: function() {
+        const target = document.getElementById('mesh-target').value.trim();
+        if(!target) return;
+        Mesh.log("Connecting to " + target + "...");
+        Mesh.conn = Mesh.peer.connect(target);
+        Mesh.setupConn();
+    },
+    
+    setupConn: function() {
+        Mesh.conn.on('open', () => {
+            Mesh.log("Connected to " + Mesh.conn.peer);
+            document.getElementById('mesh-remote').innerHTML = '<div style="text-align:center; padding:20px;">ACCESS GRANTED<br>Loading...</div>';
+            Mesh.requestList();
+        });
+        
+        Mesh.conn.on('data', (data) => {
+            if(data.type === 'list_req') {
+                const dir = BIO.resolve('/home/public');
+                const list = dir ? Object.keys(dir) : [];
+                Mesh.conn.send({type: 'list_res', list: list});
+            }
+            else if(data.type === 'list_res') {
+                Mesh.renderRemote(data.list);
+            }
+            else if(data.type === 'get_file') {
+                const file = BIO.resolve('/home/public/' + data.name);
+                if(file) Mesh.conn.send({type: 'file_data', name: data.name, content: file.content});
+            }
+            else if(data.type === 'file_data') {
+                BIO.saveFile('/home/public/' + data.name, data.content);
+                Mesh.log("Downloaded: " + data.name);
+                Mesh.refreshLocal();
+            }
+            else if(data.type === 'upload_file') {
+                BIO.saveFile('/home/public/' + data.name, data.content);
+                Mesh.log("Received Upload: " + data.name);
+                Mesh.refreshLocal();
+            }
+        });
+        
+        Mesh.conn.on('close', () => {
+            Mesh.log("Connection Lost");
+            document.getElementById('mesh-remote').innerHTML = 'DISCONNECTED';
+        });
+    },
+    
+    refreshLocal: function() {
+        const div = document.getElementById('mesh-local');
+        div.innerHTML = '';
+        const dir = BIO.resolve('/home/public');
+        if(!dir) return;
+        for(let key in dir) {
+            const row = document.createElement('div');
+            row.style.borderBottom = '1px dotted #555';
+            row.style.cursor = 'pointer';
+            row.style.padding = '2px';
+            row.innerText = '📄 ' + key;
+            row.onclick = () => {
+                if(Mesh.conn && confirm("UPLOAD " + key + " to Remote Peer?")) {
+                    const f = BIO.resolve('/home/public/' + key);
+                    Mesh.conn.send({type: 'upload_file', name: key, content: f.content});
+                    Mesh.log("Uploading...");
+                }
+            };
+            row.onmouseover = function(){ this.style.background = '#333'; }
+            row.onmouseout = function(){ this.style.background = 'transparent'; }
+            div.appendChild(row);
+        }
+    },
+    
+    requestList: function() {
+        if(Mesh.conn) Mesh.conn.send({type: 'list_req'});
+    },
+    
+    renderRemote: function(list) {
+        const div = document.getElementById('mesh-remote');
+        div.innerHTML = '';
+        list.forEach(key => {
+            const row = document.createElement('div');
+            row.style.borderBottom = '1px dotted #555';
+            row.style.cursor = 'pointer';
+            row.style.padding = '2px';
+            row.innerText = '📄 ' + key;
+            row.onclick = () => {
+                if(confirm("DOWNLOAD " + key + " to local drive?")) {
+                    Mesh.conn.send({type: 'get_file', name: key});
+                    Mesh.log("Requesting " + key + "...");
+                }
+            };
+            row.onmouseover = function(){ this.style.background = '#550000'; }
+            row.onmouseout = function(){ this.style.background = 'transparent'; }
+            div.appendChild(row);
+        });
+    },
+    
+    log: function(msg) {
+        document.getElementById('mesh-log').innerText = "> " + msg;
+    }
+};
+
+Kernel.createWindow('MESH DRIVE', 600, 400, html, 'win-mesh');
+setTimeout(Mesh.init, 100);
+`
+                    },
+                    "signal.js": {
+                        type: 'file',
+                        content: `
+/* --- SIGNAL MESSENGER v2.2 (No Alerts) --- */
+const html = '<div style="display:flex; height:100%; font-family:monospace; background:#111;">' +
+    '<div style="width:140px; background:#222; border-right:1px solid #444; display:flex; flex-direction:column;">' +
+        '<div style="padding:5px; border-bottom:1px solid #444; color:#fff; font-weight:bold; text-align:center;">CONTACTS</div>' +
+        '<div id="sig-contacts" style="flex:1; overflow:auto;"></div>' +
+        '<div id="sig-add-ui" style="display:none; padding:5px; background:#333;">' +
+            '<input id="sig-add-inp" style="width:100%;" placeholder="Name">' +
+            '<button onclick="Signal.confirmAdd()">OK</button>' +
+        '</div>' +
+        '<button onclick="Signal.showAdd()" style="background:#005500; color:white; border:none; padding:5px; cursor:pointer;">+ ADD USER</button>' +
+    '</div>' +
+    '<div style="flex:1; display:flex; flex-direction:column;">' +
+        '<div id="sig-login" style="padding:20px; text-align:center; color:#0f0;">' +
+            '<div>LOG IN TO SIGNAL</div><br>' +
+            '<input id="sig-user" placeholder="Create Username" style="background:black; color:white; border:1px solid #0f0; padding:5px;">' +
+            '<button onclick="Signal.login()">GO</button>' +
+        '</div>' +
+        '<div id="sig-chat" style="display:none; flex-direction:column; height:100%;">' +
+            '<div style="padding:5px; background:#333; color:#fff; border-bottom:1px solid #000; display:flex; justify-content:space-between; align-items:center;">' +
+                '<span>ID: <span id="sig-myid" style="color:#0f0;">...</span></span>' +
+                '<button onclick="Signal.logout()" style="font-size:10px; background:red; color:white; border:none; cursor:pointer;">LOGOUT</button>' +
+            '</div>' +
+            '<div id="sig-log" style="flex:1; overflow:auto; padding:10px; color:#ccc;"></div>' +
+            '<div style="display:flex; padding:5px; background:#222;">' +
+                '<input id="sig-msg" style="flex:1; background:black; color:white; border:1px solid #555;" placeholder="Message..." onkeydown="if(event.key===\\\'Enter\\\')Signal.send()">' +
+                '<button onclick="Signal.send()">SEND</button>' +
+            '</div>' +
+        '</div>' +
+    '</div>' +
+    '</div>';
+
+window.Signal = {
+    peer: null, conn: null, contacts: [],
+    
+    init: function() {
+        const saved = localStorage.getItem('divineOS_signal_contacts');
+        if(saved) Signal.contacts = JSON.parse(saved);
+        Signal.renderContacts();
+        
+        const lastUser = localStorage.getItem('divineOS_signal_user');
+        if(lastUser) {
+            document.getElementById('sig-user').value = lastUser;
+            Signal.login(); 
+        }
+    },
+    
+    login: function() {
+        const user = document.getElementById('sig-user').value.trim();
+        if(!user) return BIO.toast("Enter a username");
+        localStorage.setItem('divineOS_signal_user', user);
+        document.getElementById('sig-login').innerHTML = '<div style="margin-top:50px;">LOGGING IN AS '+user+'...</div>';
+        
+        Signal.peer = new Peer(user);
+        
+        Signal.peer.on('open', (id) => {
+            document.getElementById('sig-login').style.display = 'none';
+            document.getElementById('sig-chat').style.display = 'flex';
+            document.getElementById('sig-myid').innerText = id;
+            BIO.toast("SIGNAL: Online");
+        });
+        
+        Signal.peer.on('error', (err) => {
+            if(err.type === 'unavailable-id') {
+                BIO.toast("ID Taken. Resetting...");
+                localStorage.removeItem('divineOS_signal_user');
+                setTimeout(() => { Kernel.closeWindow('win-signal'); BIO.runScript('/core/signal.js'); }, 1000);
+            }
+            else BIO.toast("Net Error: " + err.type);
+        });
+        
+        Signal.peer.on('connection', (c) => {
+            Signal.conn = c;
+            Signal.setupConn();
+            BIO.toast("Incoming Connection...");
+            Signal.log("<i>Incoming connection...</i>");
+        });
+    },
+    
+    logout: function() {
+        localStorage.removeItem('divineOS_signal_user');
+        if(Signal.peer) Signal.peer.destroy();
+        Kernel.closeWindow('win-signal');
+        BIO.runScript('/core/signal.js'); 
+    },
+    
+    showAdd: function() { document.getElementById('sig-add-ui').style.display = 'block'; },
+    confirmAdd: function() {
+        const name = document.getElementById('sig-add-inp').value;
+        if(name) {
+            Signal.contacts.push(name);
+            localStorage.setItem('divineOS_signal_contacts', JSON.stringify(Signal.contacts));
+            Signal.renderContacts();
+        }
+        document.getElementById('sig-add-ui').style.display = 'none';
+    },
+    
+    renderContacts: function() {
+        const list = document.getElementById('sig-contacts');
+        if(!list) return;
+        list.innerHTML = '';
+        Signal.contacts.forEach(c => {
+            const div = document.createElement('div');
+            div.style.padding = '5px'; div.style.cursor = 'pointer'; div.style.color = '#ccc';
+            div.style.borderBottom = '1px solid #333';
+            div.innerText = c;
+            div.onmouseover = () => { div.style.background = '#444'; div.style.color = 'white'; };
+            div.onmouseout = () => { div.style.background = 'transparent'; div.style.color = '#ccc'; };
+            div.onclick = () => Signal.connectTo(c);
+            list.appendChild(div);
+        });
+    },
+    
+    connectTo: function(id) {
+        if(!Signal.peer) return BIO.toast("Login first.");
+        Signal.conn = Signal.peer.connect(id);
+        Signal.setupConn();
+        Signal.log("<i>Connecting to " + id + "...</i>");
+    },
+    
+    setupConn: function() {
+        Signal.conn.on('open', () => {
+            Signal.log("<b style='color:#0f0'>Connected.</b>");
+        });
+        Signal.conn.on('data', (data) => {
+            Signal.log("<b style='color:cyan'>" + Signal.conn.peer + ":</b> " + data);
+            BIO.toast("New Message from " + Signal.conn.peer);
+        });
+        Signal.conn.on('close', () => Signal.log("<i>Disconnected.</i>"));
+    },
+    
+    send: function() {
+        const inp = document.getElementById('sig-msg');
+        const msg = inp.value;
+        if(!msg || !Signal.conn) return;
+        Signal.conn.send(msg);
+        Signal.log("<b>Me:</b> " + msg);
+        inp.value = '';
+    },
+    
+    log: function(html) {
+        const div = document.getElementById('sig-log');
+        div.innerHTML += '<div>'+html+'</div>';
+        div.scrollTop = div.scrollHeight;
+    }
+};
+
+Kernel.createWindow('SIGNAL', 550, 400, html, 'win-signal');
+setTimeout(Signal.init, 100);
+`
+                    },
+                    // --- CORRECTED PRISM (NO ALERTS, NO PROMPTS) ---
+                    "prism.js": { 
+                        type: 'file', 
+                        content: `
+/* --- PRISM SILENT MODE --- */
+const html = '<div style="display:flex; flex-direction:column; height:100%; background:#222; color:white; font-family:monospace;">' +
+    '<div style="display:flex; background:#444; padding:5px; gap:5px;">' +
+        '<button onclick="Prism.setMode(\\\'lock\\\')" id="p-btn-lock" style="flex:1;">LOCK (Hide)</button>' +
+        '<button onclick="Prism.setMode(\\\'unlock\\\')" id="p-btn-unlock" style="flex:1;">UNLOCK (Reveal)</button>' +
+    '</div>' +
+    '<div id="prism-view" style="flex:1; padding:10px; display:flex; flex-direction:column; gap:10px;"></div>' +
+    '</div>';
+
+window.Prism = {
+    mode: 'lock',
+    img: null,
+    
+    setMode: function(m) {
+        Prism.mode = m;
+        Prism.render();
+    },
+    
+    render: function() {
+        const v = document.getElementById('prism-view');
+        const bLock = document.getElementById('p-btn-lock');
+        const bUnlock = document.getElementById('p-btn-unlock');
+        
+        bLock.style.background = Prism.mode==='lock' ? '#AA0000' : '#555';
+        bUnlock.style.background = Prism.mode==='unlock' ? '#00AA00' : '#555';
+
+        if(Prism.mode === 'lock') {
+            v.innerHTML = '<div style="background:black; padding:5px; border:1px solid #555;">1. DRAG IMAGE INTO WINDOW</div>' +
+            '<input id="p-path" placeholder="Path will appear here" readonly style="background:#333; color:white; padding:5px; border:1px solid #555;">' + 
+            '<textarea id="p-msg" placeholder="Type Secret Message Here..." style="flex:1; background:black; color:#0f0; border:1px solid #555; padding:5px;"></textarea>' +
+            '<button onclick="Prism.encode()" style="padding:10px; background:purple; color:white; font-weight:bold; border:2px solid white;">ENCODE & SAVE TO DISK</button>';
+        } else {
+            v.innerHTML = '<div style="background:black; padding:5px; border:1px solid #555;">1. DRAG SECRET IMAGE INTO WINDOW</div>' +
+            '<input id="p-path" placeholder="Path will appear here" readonly style="background:#333; color:white; padding:5px; border:1px solid #555;">' +
+            '<div id="p-out" style="flex:1; background:black; border:1px solid #555; color:#0f0; padding:10px; white-space:pre-wrap; overflow:auto;">[Message will appear here]</div>' +
+            '<button onclick="Prism.decode()" style="padding:10px; background:green; color:white; font-weight:bold; border:2px solid white;">DECODE MESSAGE</button>';
+        }
+    },
+    
+    loadImgFromDrop: function(path, content) {
+        document.getElementById('p-path').value = path;
+        const img = new Image();
+        img.onload = () => { 
+            Prism.img = img; 
+            BIO.toast("Image Loaded into Prism"); 
+        };
+        img.src = content;
+    },
+    
+    encode: function() {
+        if(!Prism.img) return BIO.toast("Drag an image in first!");
+        const msg = document.getElementById('p-msg').value;
+        if(!msg) return BIO.toast("Enter a message to hide.");
+        
+        const c = document.createElement('canvas');
+        c.width = Prism.img.width; c.height = Prism.img.height;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(Prism.img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, c.width, c.height);
+        const data = imgData.data;
+        
+        let bin = "";
+        for (let i = 0; i < msg.length; i++) {
+            bin += msg.charCodeAt(i).toString(2).padStart(8, '0');
+        }
+        bin += "00000000"; 
+        
+        if (bin.length > data.length / 4) return BIO.toast("Message too long for this image!");
+        
+        for (let i = 0; i < bin.length; i++) {
+            const pixelIndex = i * 4; 
+            const bit = parseInt(bin[i]);
+            data[pixelIndex + 2] = (data[pixelIndex + 2] & 254) | bit;
+        }
+        
+        ctx.putImageData(imgData, 0, 0);
+        
+        const newUrl = c.toDataURL('image/png'); 
+        const oldPath = document.getElementById('p-path').value;
+        const newPath = oldPath.replace('.png', '_secret.png').replace('.jpg', '_secret.png');
+        
+        // SILENT SAVE, NO PROMPT
+        BIO.saveFile(newPath, newUrl);
+        BIO.toast("Secret Image Saved: " + newPath);
+    },
+    
+    decode: function() {
+        if(!Prism.img) return BIO.toast("Drag an image in first!");
+        const c = document.createElement('canvas');
+        c.width = Prism.img.width; c.height = Prism.img.height;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(Prism.img, 0, 0);
+        const data = ctx.getImageData(0, 0, c.width, c.height).data;
+        
+        let bin = "";
+        let char = "";
+        let msg = "";
+        
+        for (let i = 0; i < data.length; i += 4) {
+            const bit = data[i + 2] & 1; 
+            char += bit;
+            if (char.length === 8) {
+                const code = parseInt(char, 2);
+                if (code === 0) break; 
+                msg += String.fromCharCode(code);
+                char = "";
+            }
+        }
+        document.getElementById('p-out').innerText = msg;
+        BIO.toast("Decoding Complete.");
+    }
+};
+
+Kernel.createWindow('PRISM v2.1', 400, 500, html, 'win-prism');
+Prism.render();
+
+const win = document.getElementById('win-prism');
+if(win) {
+    win.ondragover = (e) => e.preventDefault();
+    win.ondrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const files = e.dataTransfer.files;
+        if(files.length > 0) {
+            const f = files[0];
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                Prism.loadImgFromDrop(f.name, evt.target.result);
+            };
+            reader.readAsDataURL(f);
+        }
+    };
+}
+` 
+                    },
+                    "nexus.js": { type: 'file', content: `const id='win-nexus';const html='<div style="display:flex; flex-direction:column; height:100%; background:#ccc;"><div style="padding:5px; display:flex; gap:5px; border-bottom:1px solid black;"><input id="nx-url" value="/www/bookmarks.html" style="flex:1;" placeholder="http://... or /www/file.html"><button onclick="Nexus.go()">GO</button></div><div style="flex:1; background:white; position:relative;"><iframe id="nx-frame" style="width:100%; height:100%; border:none;"></iframe></div></div>';window.Nexus={go:function(){let url=document.getElementById('nx-url').value;const frame=document.getElementById('nx-frame');if(url.includes('localhost')||url.startsWith('/www/')){let path=url.replace('http://localhost','').replace('localhost','');if(path===''||path==='/')path='/index.html';if(!path.startsWith('/'))path='/'+path;const file=BIO.resolve(path);if(file){frame.srcdoc=file.content}else{frame.srcdoc="<h1>404 NOT FOUND</h1><p>File does not exist in /www/</p>"}}else{if(!url.startsWith('http'))url='https://'+url;frame.removeAttribute('srcdoc');frame.src=url}}};Kernel.createWindow('NEXUS WEB',650,500,html,id);Nexus.go();` },
                     "taskmgr.js": { type: 'file', content: `const html = '<div style="height:100%; display:flex; flex-direction:column; padding:10px;"><div style="border-bottom:1px solid black; font-weight:bold;">ACTIVE PROCESSES</div><div id="proc-list" style="flex:1; overflow:auto; margin-top:5px;"></div><button onclick="TaskMgr.refresh()" style="margin-top:5px;">REFRESH</button></div>';window.TaskMgr = {refresh: function() {const list = document.getElementById('proc-list');list.innerHTML = '';const wins = window.Kernel.activeWindows;for(let id in wins) {const row = document.createElement('div');row.style.borderBottom = '1px dotted #ccc';row.style.display = 'flex'; row.style.justifyContent = 'space-between';row.innerHTML = '<span>'+wins[id]+'</span> <button onclick="Kernel.closeWindow(\\''+id+'\\');TaskMgr.refresh()" style="background:red;color:white;border:none;cursor:pointer;">KILL</button>';list.appendChild(row)}}};Kernel.createWindow('TASK_MANAGER', 300, 400, html, 'win-taskmgr');TaskMgr.refresh();` },
                     "config_editor.js": { type: 'file', content: `const html = '<div style="height:100%; display:flex; flex-direction:column; padding:10px;"><h3>SYSTEM CONFIGURATION</h3><p>Changes apply immediately upon save.</p><textarea id="cfg-data" style="flex:1; margin-bottom:10px; font-family:monospace;"></textarea><button onclick="Config.save()" style="padding:10px;">SAVE & APPLY</button></div>';window.Config = {init: function() {const file = BIO.resolve('/system/config.json');if(file) document.getElementById('cfg-data').value = file.content.trim();},save: function() {const data = document.getElementById('cfg-data').value;try { JSON.parse(data); } catch(e) { return BIO.toast("INVALID JSON"); }BIO.saveFile('/system/config.json', data);BIO.applyTheme();}};Kernel.createWindow('SETTINGS', 400, 500, html, 'win-cfg');Config.init();` },
                     "manifest.js": { type: 'file', content: `window.Manifest={render:function(path){const dir=BIO.resolve(path);let html='<div style="background:#ddd; padding:5px; border-bottom:1px solid black;">PATH: '+path+'</div><div class="file-list">';if(path!=='/'){const parent=path.substring(0,path.lastIndexOf('/'))||'/';html+='<div class="file-row"><span class="f-icon" onclick="Manifest.render(\\''+parent+'\\')">🔙</span><span class="f-name" onclick="Manifest.render(\\''+parent+'\\')">.. (UP)</span></div>'}if(dir){for(let key in dir){const fullPath=(path==='/'?'':path)+'/'+key;const item=dir[key];const isDir=item.type==='dir';const icon=isDir?'📁':(key.endsWith('.snd')?'🎵':(key.endsWith('.pdf')?'📕':'📄'));const clickAction=isDir?"Manifest.render(\\''+fullPath+'\\')":"BIO.runScript(\\''+fullPath+'\\')";html+='<div class="file-row"><span class="f-icon" onclick="'+clickAction+'">'+icon+'</span><span class="f-name" onclick="'+clickAction+'">'+key+'</span>';if(!isDir){html+='<button class="f-btn" onclick="BIO.editFile(\\''+fullPath+'\\')">EDIT</button><button class="f-btn" onclick="BIO.runScript(\\''+fullPath+'\\')">RUN</button><button class="f-btn exp" onclick="BIO.exportFile(\\''+fullPath+'\\')">EXP</button>'}else{html+='<button class="f-btn" onclick="Manifest.render(\\''+fullPath+'\\')">OPEN</button>'}html+='<button class="f-btn del" onclick="BIO.deleteFile(\\''+fullPath+'\\'); Manifest.render(\\''+path+'\\')">DEL</button></div>'}}html+='</div>';const existing=document.getElementById('win-manifest');if(existing){existing.querySelector('.content').innerHTML=html;existing.style.zIndex=++BIO.zIndex}else{Kernel.createWindow('MANIFEST',450,400,html,'win-manifest')}}};Manifest.render('/home');` },
@@ -963,6 +1493,21 @@ Identity.init();
         const file = BIO.resolve(path);
         if(!file || file.type !== 'file') return BIO.toast("FILE NOT FOUND: " + path);
         try {
+            // --- NEW: HTML HANDLER ---
+            if (file.content.trim().startsWith('<') || file.content.includes('<html')) {
+                const title = path.split('/').pop().toUpperCase();
+                const winId = 'win-html-' + Date.now();
+                const html = '<iframe id="frame-'+winId+'" style="width:100%; height:100%; border:none; background:white;"></iframe>';
+                
+                Kernel.createWindow(title, 600, 400, html, winId);
+                
+                setTimeout(() => {
+                    const frame = document.getElementById('frame-'+winId);
+                    if(frame) frame.srcdoc = file.content;
+                }, 100);
+                return;
+            }
+
             if(file.content.startsWith('data:application/pdf')) {
                 const title = path.split('/').pop().toUpperCase();
                 const html = '<iframe src="'+file.content+'" style="width:100%;height:100%;border:none;"></iframe>';
@@ -1101,6 +1646,11 @@ window.onload = function() {
     d.addEventListener('dragleave', e => { e.preventDefault(); document.getElementById('desktop').classList.remove('drag-over'); });
     d.addEventListener('drop', BIO.handleDrop);
     
+    // SETUP PDF WORKER ONLY WHEN READY
+    if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
     // START BOOT PROCESS (Will stop for Password)
     BIO.reboot();
     
